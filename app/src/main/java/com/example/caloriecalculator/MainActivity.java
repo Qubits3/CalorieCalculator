@@ -15,11 +15,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void walkActivity(View view){
-        Intent walk = new Intent(getApplicationContext(), WalkActivity.class);
+        Intent walk = new Intent(getApplicationContext(), MapsActivity.class);
         startActivity(walk);
     }
     public void bicycleActivity(View view){
-        Intent bicycle = new Intent(getApplicationContext(), BicycleActivity.class);
+        Intent bicycle = new Intent(getApplicationContext(), MapsActivity.class);
         startActivity(bicycle);
     }
     public void graphActivity(View view){

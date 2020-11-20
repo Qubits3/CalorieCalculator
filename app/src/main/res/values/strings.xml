@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">CalorieCalculator</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="find_your_location">Find your location</string>
 </resources>
