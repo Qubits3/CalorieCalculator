@@ -2,4 +2,9 @@
     <string name="app_name">CalorieCalculator</string>
     <string name="title_activity_maps">Map</string>
     <string name="find_your_location">Find your location</string>
+    <string name="mapbox_access_token">pk.eyJ1IjoicXViaXRzMiIsImEiOiJja2hxcXZrbHAwMnllMnJsaG1idDEyc2oxIn0.1P5d5vuoQJQKnabiNPoScA</string>
+    <string name="driving_profile">Driving</string>
+    <string name="walking_profile">Walking</string>
+    <string name="cycling_profile">Cycling</string>
+    <string name="instruction">Instruction</string>
 </resources>
