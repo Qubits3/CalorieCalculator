@@ -14,6 +14,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
+    public void firstActivity(View view){
+        Intent first = new Intent(getApplicationContext(), FirstActivity.class);
+        startActivity(first);
+    }
     public void walkActivity(View view){
         Intent walk = new Intent(getApplicationContext(), MapsActivity.class);
         startActivity(walk);
