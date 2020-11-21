@@ -50,7 +50,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 
 
-public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapClickListener{
+public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapClickListener {
 /*
     private GoogleMap mMap;
     LocationManager locationManager;
@@ -328,7 +328,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapCli
     }
     */
 
-    private static final String TAG = "DirectionsProfileToggleActivity";
+    private static final String TAG = "MapsActivity";
     private static final String ROUTE_LAYER_ID = "route-layer-id";
     private static final String ROUTE_SOURCE_ID = "route-source-id";
     private static final String ICON_LAYER_ID = "icon-layer-id";
@@ -361,14 +361,13 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapCli
 
         setContentView(R.layout.activity_maps);
 
-
         drivingButton = findViewById(R.id.driving_profile_button);
         drivingButton.setTextColor(Color.WHITE);
         walkingButton = findViewById(R.id.walking_profile_button);
         cyclingButton = findViewById(R.id.cycling_profile_button);
 
         mapView = findViewById(R.id.mapView);
-        mapView.onCreate(savedInstanceState);
+        //mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(@NonNull MapboxMap mapboxMap) {
@@ -492,11 +491,11 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapCli
                 @Override
                 public void onStyleLoaded(@NonNull Style style) {
 
-// Retrieve and update the source designated for showing the directions route
+                    // Retrieve and update the source designated for showing the directions route
                     GeoJsonSource routeLineSource = style.getSourceAs(ROUTE_SOURCE_ID);
 
-// Create a LineString with the directions route's geometry and
-// reset the GeoJSON source for the route LineLayer source
+                    // Create a LineString with the directions route's geometry and
+                    // reset the GeoJSON source for the route LineLayer source
                     if (routeLineSource != null) {
                         switch (lastSelectedDirectionsProfile) {
                             case DirectionsCriteria.PROFILE_DRIVING:
@@ -526,7 +525,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapCli
     private void initLayers(@NonNull Style loadedMapStyle) {
         LineLayer routeLayer = new LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID);
 
-// Add the LineLayer to the map. This layer will display the directions route.
+        // Add the LineLayer to the map. This layer will display the directions route.
         routeLayer.setProperties(
                 lineCap(Property.LINE_CAP_ROUND),
                 lineJoin(Property.LINE_JOIN_ROUND),
@@ -539,7 +538,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapCli
 //        loadedMapStyle.addImage(RED_PIN_ICON_ID, Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(
 //                getResources().getDrawable(R.drawable.baseline_gps_fixed_24))));
 
-// Add the red marker icon SymbolLayer to the map
+        // Add the red marker icon SymbolLayer to the map
         loadedMapStyle.addLayer(new SymbolLayer(ICON_LAYER_ID, ICON_SOURCE_ID).withProperties(
                 iconImage(RED_PIN_ICON_ID),
                 iconIgnorePlacement(true),
@@ -565,7 +564,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapCli
         client.enqueueCall(new Callback<DirectionsResponse>() {
             @Override
             public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-// You can get the generic HTTP info about the response
+                // You can get the generic HTTP info about the response
                 Timber.d("Response code: " + response.code());
                 if (response.body() == null) {
                     Timber.e("No routes found, make sure you set the right user and access token.");
