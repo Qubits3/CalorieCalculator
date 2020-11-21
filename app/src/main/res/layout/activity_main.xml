@@ -7,47 +7,59 @@
     tools:context=".MainActivity">
 
     <ImageButton
-        android:id="@+id/imageButton2"
-        android:layout_width="0dp"
-        android:layout_height="105dp"
-        android:layout_marginTop="16dp"
+        android:id="@+id/profileButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="25dp"
-        android:onClick="bicycleActivity"
-        android:scaleType="fitXY"
+        android:scaleType="fitCenter"
+        android:src="@drawable/profile"
+        app:layout_constraintBottom_toTopOf="@+id/bicycleButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageButton4"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/bisiklet" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
-        android:id="@+id/imageButton4"
+        android:id="@+id/walkButton"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="110dp"
         android:layout_marginStart="25dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="14dp"
         android:layout_marginBottom="7dp"
         android:onClick="walkActivity"
         android:scaleType="fitCenter"
-        app:layout_constraintBottom_toTopOf="@+id/imageButton5"
-        app:layout_constraintEnd_toStartOf="@+id/imageButton2"
+        app:layout_constraintBottom_toTopOf="@+id/graphButton"
+        app:layout_constraintEnd_toStartOf="@+id/bicycleButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profileButton"
         app:srcCompat="@drawable/kosanadam" />
 
     <ImageButton
-        android:id="@+id/imageButton5"
+        android:id="@+id/bicycleButton"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="25dp"
+        android:layout_height="110dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="25dp"
-        android:layout_marginBottom="366dp"
+        android:onClick="bicycleActivity"
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/walkButton"
+        app:layout_constraintTop_toBottomOf="@+id/profileButton"
+        app:srcCompat="@drawable/bisiklet" />
+
+    <ImageButton
+        android:id="@+id/graphButton"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="25dp"
         android:onClick="graphActivity"
         android:scaleType="fitCenter"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageButton4"
+        app:layout_constraintTop_toBottomOf="@+id/bicycleButton"
         app:srcCompat="@drawable/grafikbutonu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
