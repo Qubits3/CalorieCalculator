@@ -20,10 +20,12 @@ public class MainActivity extends AppCompatActivity {
     }
     public void walkActivity(View view){
         Intent walk = new Intent(getApplicationContext(), MapsActivity.class);
+        walk.putExtra("profile", "walking");
         startActivity(walk);
     }
     public void bicycleActivity(View view){
         Intent bicycle = new Intent(getApplicationContext(), MapsActivity.class);
+        bicycle.putExtra("profile", "cycling");
         startActivity(bicycle);
     }
     public void graphActivity(View view){

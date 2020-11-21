@@ -1,11 +1,32 @@
 package com.example.caloriecalculator;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.FragmentActivity;
+
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -13,26 +34,19 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.mapboxsdk.utils.BitmapUtils;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentActivity;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -49,49 +63,60 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 
+public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLongClickListener {
 
-public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapClickListener {
-/*
-    private GoogleMap mMap;
+    private static final String ROUTE_LAYER_ID = "route-layer-id";
+    private static final String ROUTE_SOURCE_ID = "route-source-id";
+    private static final String ICON_LAYER_ID = "icon-layer-id";
+    private static final String ICON_SOURCE_ID = "icon-source-id";
+    private static final String RED_PIN_ICON_ID = "red-pin-icon-id";
+    private MapView mapView;
+    private MapboxMap mapboxMap;
+    private DirectionsRoute walkingRoute;
+    private DirectionsRoute cyclingRoute;
+    private Point destination = Point.fromLngLat(-99.167663574, 19.426984786987);  //set predestined location
+    private String lastSelectedDirectionsProfile = DirectionsCriteria.PROFILE_CYCLING;  //store last selected profile
+    private final String[] profiles = new String[]{
+            DirectionsCriteria.PROFILE_CYCLING,
+            DirectionsCriteria.PROFILE_WALKING
+    };
+
     LocationManager locationManager;
     LocationListener locationListener;
     LocationRequest locationRequest;
     LatLng userLocation;
-    private LatLng mOrigin;
-    private LatLng mDestination;
     FloatingActionButton mapsFab;
 
     private final int REQUEST_CHECK_SETTINGS = 9001;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /*
+         * Get an instance of the map, this has to be set before setContentView()
+         */
+        Mapbox.getInstance(this, getString(R.string.mapbox_access_token));
+
         setContentView(R.layout.activity_maps);
 
+        Bundle extras = getIntent().getExtras();
+        lastSelectedDirectionsProfile = extras.getString("profile");
+
+        /*
+         * Initialize floating action button
+         */
         mapsFab = findViewById(R.id.maps_fab);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        assert mapFragment != null;
-        mapFragment.getMapAsync(this);
-
-        //
-        mOrigin = new LatLng(41.3949, 2.0086);
-        mDestination = new LatLng(41.1258, 1.2035);
-        //
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
+        /*
+         * Ask to user to open his location as google style
+         */
         createLocationRequest();
-
         createLocationRequestPopup();
 
-        mMap.setOnMapLongClickListener(this);
-
+        /*
+         * Initialize location manager and listener
+         */
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
@@ -115,24 +140,47 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapCli
             }
         };
 
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        } else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        mapView = findViewById(R.id.mapView);
+        /*
+         * Load map asynchronously
+         */
+        mapView.getMapAsync(mapboxMap -> {
+            /*
+             * Set view style such as street view, satellite view or traffic view, and night mode can be set here as well
+             */
+            mapboxMap.setStyle(Style.OUTDOORS, style -> {
 
-            Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (lastLocation != null) {
-                LatLng lastUserLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastUserLocation, 15));
-            }
-        }
+                MapsActivity.this.mapboxMap = mapboxMap;
 
-        //
-        mMap.addMarker(new MarkerOptions().position(mOrigin).title("Origin"));
-        mMap.addMarker(new MarkerOptions().position(mDestination).title("Destination"));
-        new TaskDirectionRequest().execute(getRequestedUrl(mOrigin,mDestination));
-        //
+                initSource(style);
+
+                initLayers(style);
+
+                //getAllRoutes(false);
+
+                mapboxMap.addOnMapLongClickListener(MapsActivity.this);
+
+                /*
+                 * Check location permission, if not granted ask to user
+                 */
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                } else {
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+
+                    Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    if (lastLocation != null) {
+                        LatLng lastUserLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+                        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastUserLocation, 15));
+                    }
+                }
+
+                Toast.makeText(MapsActivity.this,
+                        R.string.instruction, Toast.LENGTH_SHORT).show();
+            });
+        });
+
     }
 
     @Override
@@ -147,9 +195,175 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapCli
                 Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 if (lastLocation != null) {
                     LatLng lastUserLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                    //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastUserLocation, 15));
+                    mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastUserLocation, 15));
                 }
             }
+        }
+    }
+
+    /**
+     * Load route info for each Directions API profile.
+     *
+     */
+    private void getAllRoutes() {
+        for (String profile : profiles) {
+            getSingleRoute(profile);
+        }
+    }
+
+    @Override
+    public boolean onMapLongClick(@NonNull LatLng point) {
+        destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+        moveDestinationMarkerToNewLocation(point);
+        getAllRoutes();
+        return true;
+    }
+
+    /**
+     * Move the destination marker to wherever the map was tapped on.
+     *
+     * @param pointToMoveMarkerTo where the map was tapped on
+     */
+    private void moveDestinationMarkerToNewLocation(LatLng pointToMoveMarkerTo) {
+        mapboxMap.getStyle(style -> {
+            GeoJsonSource destinationIconGeoJsonSource = style.getSourceAs(ICON_SOURCE_ID);
+            if (destinationIconGeoJsonSource != null) {
+                destinationIconGeoJsonSource.setGeoJson(Feature.fromGeometry(Point.fromLngLat(
+                        pointToMoveMarkerTo.getLongitude(), pointToMoveMarkerTo.getLatitude())));
+            }
+        });
+    }
+
+    /**
+     * Add the source for the Directions API route line LineLayer.
+     */
+    private void initSource(@NonNull Style loadedMapStyle) {
+        loadedMapStyle.addSource(new GeoJsonSource(ROUTE_SOURCE_ID));
+        GeoJsonSource iconGeoJsonSource = new GeoJsonSource(ICON_SOURCE_ID,
+                Feature.fromGeometry(Point.fromLngLat(destination.longitude(),
+                        destination.latitude())));
+        loadedMapStyle.addSource(iconGeoJsonSource);
+    }
+
+    /**
+     * Display the Directions API route line depending on which profile was last
+     * selected.
+     */
+    private void showRouteLine() {
+        if (mapboxMap != null) {
+            mapboxMap.getStyle(style -> {
+
+                // Retrieve and update the source designated for showing the directions route
+                GeoJsonSource routeLineSource = style.getSourceAs(ROUTE_SOURCE_ID);
+
+                // Create a LineString with the directions route's geometry and
+                // reset the GeoJSON source for the route LineLayer source
+                if (routeLineSource != null) {
+                    switch (lastSelectedDirectionsProfile) {
+                        case DirectionsCriteria.PROFILE_WALKING:
+                            if (walkingRoute != null)
+                                routeLineSource.setGeoJson(LineString.fromPolyline(Objects.requireNonNull(walkingRoute.geometry()), PRECISION_6));
+                            break;
+                        case DirectionsCriteria.PROFILE_CYCLING:
+                            if (cyclingRoute != null)
+                            routeLineSource.setGeoJson(LineString.fromPolyline(Objects.requireNonNull(cyclingRoute.geometry()), PRECISION_6));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Add the route and icon layers to the map
+     */
+    private void initLayers(@NonNull Style loadedMapStyle) {
+        LineLayer routeLayer = new LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID);
+
+        /*
+         * Add the LineLayer to the map. This layer will display the directions route.
+         */
+        routeLayer.setProperties(
+                lineCap(Property.LINE_CAP_ROUND),  //shape of the route line endings
+                lineJoin(Property.LINE_JOIN_ROUND),
+                lineWidth(5f),
+                lineColor(Color.parseColor("#006eff"))  //set route line color here
+        );
+        loadedMapStyle.addLayer(routeLayer);
+
+        /*
+         * Add the marker icon image to the map
+         */
+        loadedMapStyle.addImage(RED_PIN_ICON_ID, Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.baseline_room_24, null)));
+
+        /*
+         * Add the marker icon SymbolLayer to the map
+         */
+        loadedMapStyle.addLayer(new SymbolLayer(ICON_LAYER_ID, ICON_SOURCE_ID).withProperties(
+                iconImage(RED_PIN_ICON_ID),
+                iconIgnorePlacement(true),
+                iconAllowOverlap(true),
+                iconOffset(new Float[]{0f, -9f})));
+    }
+
+    /**
+     * Make a request to the Mapbox Directions API. Once successful, pass the route to the
+     * route layer.
+     *
+     * @param profile the directions profile to use in the Directions API request
+     */
+    private void getSingleRoute(String profile) {
+        /*
+         * Initialize Mapbox Directions
+         */
+        if (userLocation != null) {
+            MapboxDirections mapboxDirections = MapboxDirections.builder()
+                    .origin(Point.fromLngLat(userLocation.getLongitude(), userLocation.getLatitude()))
+                    .destination(destination)
+                    .overview(DirectionsCriteria.OVERVIEW_FULL)
+                    .profile(profile)
+                    .accessToken(getString(R.string.mapbox_access_token))
+                    .build();
+
+            /*
+             * Ask from the server for a route asynchronously
+             */
+            mapboxDirections.enqueueCall(new Callback<DirectionsResponse>() {
+                @Override
+                public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
+                    // You can get the generic HTTP info about the response
+                    Timber.d("Response code: " + response.code());
+                    if (response.body() == null) {
+                        Timber.e("No routes found, make sure you set the right user and access token.");
+                        return;
+                    } else if (response.body().routes().size() < 1) {
+                        Timber.e("No routes found");
+                        return;
+                    }
+
+                    switch (profile) {
+                        case DirectionsCriteria.PROFILE_WALKING:
+                            walkingRoute = response.body().routes().get(0);
+                            break;
+                        case DirectionsCriteria.PROFILE_CYCLING:
+                            cyclingRoute = response.body().routes().get(0);
+                            break;
+                        default:
+                            break;
+                    }
+                    showRouteLine();
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
+                    Timber.e("Error: " + throwable.getMessage());
+                    Toast.makeText(MapsActivity.this,
+                            "Error: " + throwable.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 
@@ -167,451 +381,27 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapCli
         SettingsClient client = LocationServices.getSettingsClient(this);
         Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
 
-        task.addOnSuccessListener(this, locationSettingsResponse -> {
-            mapsFab.setImageResource(R.drawable.baseline_location_searching_24);
-            // All location settings are satisfied. The client can initialize
-            // location requests here.
-            // ...
-        });
+        task.addOnSuccessListener(this, locationSettingsResponse -> mapsFab.setImageResource(R.drawable.baseline_location_searching_24));
 
         task.addOnFailureListener(this, e -> {
             if (e instanceof ResolvableApiException) {
-                // Location settings are not satisfied, but this can be fixed
-                // by showing the user a dialog.
                 try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
                     ResolvableApiException resolvable = (ResolvableApiException) e;
                     resolvable.startResolutionForResult(MapsActivity.this,
                             REQUEST_CHECK_SETTINGS);
                 } catch (IntentSender.SendIntentException sendEx) {
-                    // Ignore the error.
+                    sendEx.printStackTrace();
                 }
             }
         });
     }
 
-    private String getRequestedUrl(LatLng origin, LatLng destination) {
-        String strOrigin = "origin=" + origin.latitude + "," + origin.longitude;
-        String strDestination = "destination=" + destination.latitude + "," + destination.longitude;
-        String sensor = "sensor=false";
-        String mode = "mode=driving";
-
-        String param = strOrigin + "&" + strDestination + "&" + sensor + "&" + mode;
-        String output = "json";
-        String APIKEY = getResources().getString(R.string.google_maps_key);
-
-        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + param + APIKEY;
-        return url;
-    }
-
-    private String requestDirection(String requestedUrl) {
-        String responseString = "";
-        InputStream inputStream = null;
-        HttpURLConnection httpURLConnection = null;
-        try {
-            URL url = new URL(requestedUrl);
-            httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.connect();
-
-            inputStream = httpURLConnection.getInputStream();
-            InputStreamReader reader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(reader);
-
-            StringBuffer stringBuffer = new StringBuffer();
-            String line = "";
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuffer.append(line);
-            }
-            responseString = stringBuffer.toString();
-            bufferedReader.close();
-            reader.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        httpURLConnection.disconnect();
-        return responseString;
-    }
-
-
-    //Get JSON data from Google Direction
-    public class TaskDirectionRequest extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... strings) {
-            String responseString = "";
-            try {
-                responseString = requestDirection(strings[0]);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return responseString;
-        }
-
-        @Override
-        protected void onPostExecute(String responseString) {
-            super.onPostExecute(responseString);
-            //Json object parsing
-            TaskParseDirection parseResult = new TaskParseDirection();
-            parseResult.execute(responseString);
-        }
-    }
-
-    //Parse JSON Object from Google Direction API & display it on Map
-    public class TaskParseDirection extends AsyncTask<String, Void, List<List<HashMap<String, String>>>> {
-        @Override
-        protected List<List<HashMap<String, String>>> doInBackground(String... jsonString) {
-            List<List<HashMap<String, String>>> routes = null;
-            JSONObject jsonObject = null;
-
-            try {
-                jsonObject = new JSONObject(jsonString[0]);
-                DirectionParser parser = new DirectionParser();
-                routes = parser.parse(jsonObject);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return routes;
-        }
-
-        @Override
-        protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
-            super.onPostExecute(lists);
-            ArrayList points = null;
-            PolylineOptions polylineOptions = null;
-
-            for (List<HashMap<String, String>> path : lists) {
-                points = new ArrayList();
-                polylineOptions = new PolylineOptions();
-
-                for (HashMap<String, String> point : path) {
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lon = Double.parseDouble(point.get("lng"));
-
-                    points.add(new LatLng(lat, lon));
-                }
-                polylineOptions.addAll(points);
-                polylineOptions.width(15f);
-                polylineOptions.color(Color.BLUE);
-                polylineOptions.geodesic(true);
-            }
-            if (polylineOptions != null) {
-                mMap.addPolyline(polylineOptions);
-            } else {
-                Toast.makeText(getApplicationContext(), "Direction not found", Toast.LENGTH_LONG).show();
-            }
-        }
-
-
-    }
-
-    @Override
-    public void onMapLongClick(LatLng latLng) {
-
-    }
-
+    /**
+     * Floating action button function"
+     */
     public void findLocation(View view) {
         createLocationRequestPopup();
-
-        LatLng barcelona = new LatLng(41.3949, 2.0086);
-
-        if (userLocation != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(barcelona, 8f));
-        }
-    }
-    */
-
-    private static final String TAG = "MapsActivity";
-    private static final String ROUTE_LAYER_ID = "route-layer-id";
-    private static final String ROUTE_SOURCE_ID = "route-source-id";
-    private static final String ICON_LAYER_ID = "icon-layer-id";
-    private static final String ICON_SOURCE_ID = "icon-source-id";
-    private static final String RED_PIN_ICON_ID = "red-pin-icon-id";
-    private MapView mapView;
-    private MapboxMap mapboxMap;
-    private DirectionsRoute drivingRoute;
-    private DirectionsRoute walkingRoute;
-    private DirectionsRoute cyclingRoute;
-    private MapboxDirections client;
-    private Point origin = Point.fromLngLat(-99.13037323366, 19.40488375253);
-    private Point destination = Point.fromLngLat(-99.167663574, 19.426984786987);
-    private String lastSelectedDirectionsProfile = DirectionsCriteria.PROFILE_DRIVING;
-    private Button drivingButton;
-    private Button walkingButton;
-    private Button cyclingButton;
-    private boolean firstRouteDrawn = false;
-    private String[] profiles = new String[]{
-            DirectionsCriteria.PROFILE_DRIVING,
-            DirectionsCriteria.PROFILE_CYCLING,
-            DirectionsCriteria.PROFILE_WALKING
-    };
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        Mapbox.getInstance(this, getString(R.string.mapbox_access_token));
-
-        setContentView(R.layout.activity_maps);
-
-        drivingButton = findViewById(R.id.driving_profile_button);
-        drivingButton.setTextColor(Color.WHITE);
-        walkingButton = findViewById(R.id.walking_profile_button);
-        cyclingButton = findViewById(R.id.cycling_profile_button);
-
-        mapView = findViewById(R.id.mapView);
-        //mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(@NonNull MapboxMap mapboxMap) {
-                mapboxMap.setStyle(Style.MAPBOX_STREETS, new Style.OnStyleLoaded() {
-                    @Override
-                    public void onStyleLoaded(@NonNull Style style) {
-
-                        MapsActivity.this.mapboxMap = mapboxMap;
-
-                        initSource(style);
-
-                        initLayers(style);
-
-                        getAllRoutes(false);
-
-                        initButtonClickListeners();
-
-                        mapboxMap.addOnMapClickListener(MapsActivity.this);
-
-                        Toast.makeText(MapsActivity.this,
-                                R.string.instruction, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
-
-    }
-
-    /**
-     * Load route info for each Directions API profile.
-     *
-     * @param fromMapClick whether the route loading is being triggered from tapping
-     *                     on the map
-     */
-    private void getAllRoutes(boolean fromMapClick) {
-        for (String profile : profiles) {
-            getSingleRoute(profile, fromMapClick);
-        }
-    }
-
-    @Override
-    public boolean onMapClick(@NonNull LatLng point) {
-        destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
-        moveDestinationMarkerToNewLocation(point);
-        getAllRoutes(true);
-        return true;
-    }
-
-    /**
-     * Move the destination marker to wherever the map was tapped on.
-     *
-     * @param pointToMoveMarkerTo where the map was tapped on
-     */
-    private void moveDestinationMarkerToNewLocation(LatLng pointToMoveMarkerTo) {
-        mapboxMap.getStyle(new Style.OnStyleLoaded() {
-            @Override
-            public void onStyleLoaded(@NonNull Style style) {
-                GeoJsonSource destinationIconGeoJsonSource = style.getSourceAs(ICON_SOURCE_ID);
-                if (destinationIconGeoJsonSource != null) {
-                    destinationIconGeoJsonSource.setGeoJson(Feature.fromGeometry(Point.fromLngLat(
-                            pointToMoveMarkerTo.getLongitude(), pointToMoveMarkerTo.getLatitude())));
-                }
-            }
-        });
-    }
-
-    /**
-     * Add the source for the Directions API route line LineLayer.
-     */
-    private void initSource(@NonNull Style loadedMapStyle) {
-        loadedMapStyle.addSource(new GeoJsonSource(ROUTE_SOURCE_ID));
-        GeoJsonSource iconGeoJsonSource = new GeoJsonSource(ICON_SOURCE_ID,
-                Feature.fromGeometry(Point.fromLngLat(destination.longitude(),
-                        destination.latitude())));
-        loadedMapStyle.addSource(iconGeoJsonSource);
-    }
-
-    /**
-     * Set up the click listeners on the buttons for each Directions API profile.
-     */
-    private void initButtonClickListeners() {
-        drivingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drivingButton.setTextColor(Color.WHITE);
-                walkingButton.setTextColor(Color.BLACK);
-                cyclingButton.setTextColor(Color.BLACK);
-                lastSelectedDirectionsProfile = DirectionsCriteria.PROFILE_DRIVING;
-                showRouteLine();
-            }
-        });
-        walkingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drivingButton.setTextColor(Color.BLACK);
-                walkingButton.setTextColor(Color.WHITE);
-                cyclingButton.setTextColor(Color.BLACK);
-                lastSelectedDirectionsProfile = DirectionsCriteria.PROFILE_WALKING;
-                showRouteLine();
-            }
-        });
-        cyclingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drivingButton.setTextColor(Color.BLACK);
-                walkingButton.setTextColor(Color.BLACK);
-                cyclingButton.setTextColor(Color.WHITE);
-                lastSelectedDirectionsProfile = DirectionsCriteria.PROFILE_CYCLING;
-                showRouteLine();
-            }
-        });
-    }
-
-    /**
-     * Display the Directions API route line depending on which profile was last
-     * selected.
-     */
-    private void showRouteLine() {
-        if (mapboxMap != null) {
-            mapboxMap.getStyle(new Style.OnStyleLoaded() {
-                @Override
-                public void onStyleLoaded(@NonNull Style style) {
-
-                    // Retrieve and update the source designated for showing the directions route
-                    GeoJsonSource routeLineSource = style.getSourceAs(ROUTE_SOURCE_ID);
-
-                    // Create a LineString with the directions route's geometry and
-                    // reset the GeoJSON source for the route LineLayer source
-                    if (routeLineSource != null) {
-                        switch (lastSelectedDirectionsProfile) {
-                            case DirectionsCriteria.PROFILE_DRIVING:
-                                routeLineSource.setGeoJson(LineString.fromPolyline(drivingRoute.geometry(),
-                                        PRECISION_6));
-                                break;
-                            case DirectionsCriteria.PROFILE_WALKING:
-                                routeLineSource.setGeoJson(LineString.fromPolyline(walkingRoute.geometry(),
-                                        PRECISION_6));
-                                break;
-                            case DirectionsCriteria.PROFILE_CYCLING:
-                                routeLineSource.setGeoJson(LineString.fromPolyline(cyclingRoute.geometry(),
-                                        PRECISION_6));
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    /**
-     * Add the route and icon layers to the map
-     */
-    private void initLayers(@NonNull Style loadedMapStyle) {
-        LineLayer routeLayer = new LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID);
-
-        // Add the LineLayer to the map. This layer will display the directions route.
-        routeLayer.setProperties(
-                lineCap(Property.LINE_CAP_ROUND),
-                lineJoin(Property.LINE_JOIN_ROUND),
-                lineWidth(5f),
-                lineColor(Color.parseColor("#006eff"))
-        );
-        loadedMapStyle.addLayer(routeLayer);
-
-//// Add the red marker icon image to the map
-//        loadedMapStyle.addImage(RED_PIN_ICON_ID, Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(
-//                getResources().getDrawable(R.drawable.baseline_gps_fixed_24))));
-
-        // Add the red marker icon SymbolLayer to the map
-        loadedMapStyle.addLayer(new SymbolLayer(ICON_LAYER_ID, ICON_SOURCE_ID).withProperties(
-                iconImage(RED_PIN_ICON_ID),
-                iconIgnorePlacement(true),
-                iconAllowOverlap(true),
-                iconOffset(new Float[]{0f, -9f})));
-    }
-
-    /**
-     * Make a request to the Mapbox Directions API. Once successful, pass the route to the
-     * route layer.
-     *
-     * @param profile the directions profile to use in the Directions API request
-     */
-    private void getSingleRoute(String profile, boolean fromMapClick) {
-        client = MapboxDirections.builder()
-                .origin(origin)
-                .destination(destination)
-                .overview(DirectionsCriteria.OVERVIEW_FULL)
-                .profile(profile)
-                .accessToken(getString(R.string.mapbox_access_token))
-                .build();
-
-        client.enqueueCall(new Callback<DirectionsResponse>() {
-            @Override
-            public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-                // You can get the generic HTTP info about the response
-                Timber.d("Response code: " + response.code());
-                if (response.body() == null) {
-                    Timber.e("No routes found, make sure you set the right user and access token.");
-                    return;
-                } else if (response.body().routes().size() < 1) {
-                    Timber.e("No routes found");
-                    return;
-                }
-
-                switch (profile) {
-                    case DirectionsCriteria.PROFILE_DRIVING:
-                        drivingRoute = response.body().routes().get(0);
-                        drivingButton.setText(String.format(getString(R.string.driving_profile),
-                                String.valueOf(TimeUnit.SECONDS.toMinutes(drivingRoute.duration().longValue()))));
-                        if (!firstRouteDrawn) {
-                            showRouteLine();
-                            firstRouteDrawn = true;
-                        }
-                        break;
-                    case DirectionsCriteria.PROFILE_WALKING:
-                        walkingRoute = response.body().routes().get(0);
-                        walkingButton.setText(String.format(getString(R.string.walking_profile),
-                                String.valueOf(TimeUnit.SECONDS
-                                        .toMinutes(walkingRoute.duration().longValue()))));
-                        break;
-                    case DirectionsCriteria.PROFILE_CYCLING:
-                        cyclingRoute = response.body().routes().get(0);
-                        cyclingButton.setText(String.format(getString(R.string.cycling_profile),
-                                String.valueOf(TimeUnit.SECONDS
-                                        .toMinutes(cyclingRoute.duration().longValue()))));
-                        break;
-                    default:
-                        break;
-                }
-                if (fromMapClick) {
-                    showRouteLine();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-                Timber.e("Error: " + throwable.getMessage());
-                Toast.makeText(MapsActivity.this,
-                        "Error: " + throwable.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
+        mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f), 2000);
     }
 
     @Override
@@ -639,7 +429,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapCli
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
     }
@@ -655,5 +445,4 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapCli
         super.onDestroy();
         mapView.onDestroy();
     }
-
 }

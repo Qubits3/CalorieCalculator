@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     android:columnCount="2"
     android:orientation="vertical"
     android:rowCount="2"
@@ -16,7 +16,19 @@
         android:layout_height="500dp"
         mapbox:mapbox_cameraTargetLat="19.42777430539"
         mapbox:mapbox_cameraTargetLng="-99.1523793414"
-        mapbox:mapbox_cameraZoom="11.7"/>
+        mapbox:mapbox_cameraZoom="11.7">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/maps_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="320dp"
+            android:layout_marginTop="430dp"
+            android:clickable="true"
+            android:onClick="findLocation"
+            android:contentDescription="@string/find_your_location"
+            android:src="@drawable/baseline_gps_off_24" />
+    </com.mapbox.mapboxsdk.maps.MapView>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -66,24 +78,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical">
-
-            <Button
-                android:id="@+id/driving_profile_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-
-            <Button
-                android:id="@+id/walking_profile_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-
-            <Button
-                android:id="@+id/cycling_profile_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
 
             <TextView
                 android:id="@+id/textVie4"
