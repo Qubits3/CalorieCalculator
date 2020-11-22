@@ -32,4 +32,9 @@ public class MainActivity extends AppCompatActivity {
         Intent graph = new Intent(getApplicationContext(), GraphActivity.class);
         startActivity(graph);
     }
+
+    @Override
+    public void onBackPressed() {
+        // Disable back button
+    }
 }

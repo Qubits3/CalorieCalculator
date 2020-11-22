@@ -1,8 +1,10 @@
 package com.example.caloriecalculator;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -10,7 +12,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -44,9 +46,9 @@ import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.turf.TurfMeasurement;
 
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,8 +76,8 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     private MapboxMap mapboxMap;
     private DirectionsRoute walkingRoute;
     private DirectionsRoute cyclingRoute;
-    private Point destination = Point.fromLngLat(-99.167663574, 19.426984786987);  //set predestined location
-    private String lastSelectedDirectionsProfile = DirectionsCriteria.PROFILE_CYCLING;  //store last selected profile
+    private Point destination = Point.fromLngLat(-99.167663574, 19.426984786987);  // Set predestined location
+    private String lastSelectedDirectionsProfile = DirectionsCriteria.PROFILE_CYCLING;  // Store last selected profile
     private final String[] profiles = new String[]{
             DirectionsCriteria.PROFILE_CYCLING,
             DirectionsCriteria.PROFILE_WALKING
@@ -86,6 +88,8 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     LocationRequest locationRequest;
     LatLng userLocation;
     FloatingActionButton mapsFab;
+
+    TextView toplamYolTextView;
 
     private final int REQUEST_CHECK_SETTINGS = 9001;
 
@@ -101,15 +105,17 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         setContentView(R.layout.activity_maps);
 
         Bundle extras = getIntent().getExtras();
-        lastSelectedDirectionsProfile = extras.getString("profile");
+        lastSelectedDirectionsProfile = extras.getString("profile");  // Get profile from Main Activity
 
         /*
-         * Initialize floating action button
+         * Initialize components
          */
         mapsFab = findViewById(R.id.maps_fab);
+        mapView = findViewById(R.id.mapView);
+        toplamYolTextView = findViewById(R.id.toplamYolTextView);
 
         /*
-         * Ask to user to open his location as google style
+         * Ask to user to open his location as Google style
          */
         createLocationRequest();
         createLocationRequestPopup();
@@ -121,7 +127,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
-                userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                userLocation = new LatLng(location.getLatitude(), location.getLongitude());  // Store current user location
             }
 
             @Override
@@ -131,16 +137,17 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
 
             @Override
             public void onProviderEnabled(@NonNull String provider) {
+                mapsFab.setEnabled(true);  // Enable floating action button if GPS is on
                 mapsFab.setImageResource(R.drawable.baseline_location_searching_24);
             }
 
             @Override
             public void onProviderDisabled(@NonNull String provider) {
+                mapsFab.setEnabled(false);  // Disable floating action button if GPS is off
                 mapsFab.setImageResource(R.drawable.baseline_gps_off_24);
             }
         };
 
-        mapView = findViewById(R.id.mapView);
         /*
          * Load map asynchronously
          */
@@ -156,12 +163,10 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
 
                 initLayers(style);
 
-                //getAllRoutes(false);
-
                 mapboxMap.addOnMapLongClickListener(MapsActivity.this);
 
                 /*
-                 * Check location permission, if not granted ask to user
+                 * Check location permission, ask to user if not granted
                  */
                 if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -172,12 +177,17 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                     Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     if (lastLocation != null) {
                         LatLng lastUserLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastUserLocation, 15));
+                        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastUserLocation, 15f));
                     }
                 }
 
-                Toast.makeText(MapsActivity.this,
-                        R.string.instruction, Toast.LENGTH_SHORT).show();
+                /*
+                 * Move the camera to Istanbul at first start
+                 */
+                SharedPreferences preferences = this.getPreferences(Context.MODE_PRIVATE);
+                float latitude = preferences.getFloat("lastLatitude", 41.0049823f);
+                float longitude = preferences.getFloat("lastLongitude", 28.7319945f);
+                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 10f));
             });
         });
 
@@ -195,7 +205,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                 Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 if (lastLocation != null) {
                     LatLng lastUserLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                    mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastUserLocation, 15));
+                    mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastUserLocation, 15f));
                 }
             }
         }
@@ -203,7 +213,6 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
 
     /**
      * Load route info for each Directions API profile.
-     *
      */
     private void getAllRoutes() {
         for (String profile : profiles) {
@@ -211,11 +220,20 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         }
     }
 
+    /**
+     * Set route at long click
+     *
+     * @param point where the long click location is
+     */
+    @SuppressLint({"DefaultLocale", "SetTextI18n"})
     @Override
     public boolean onMapLongClick(@NonNull LatLng point) {
         destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
         moveDestinationMarkerToNewLocation(point);
         getAllRoutes();
+
+        toplamYolTextView.setText(getDistance(userLocation, destination));
+
         return true;
     }
 
@@ -257,7 +275,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                 GeoJsonSource routeLineSource = style.getSourceAs(ROUTE_SOURCE_ID);
 
                 // Create a LineString with the directions route's geometry and
-                // reset the GeoJSON source for the route LineLayer source
+                // Reset the GeoJSON source for the route LineLayer source
                 if (routeLineSource != null) {
                     switch (lastSelectedDirectionsProfile) {
                         case DirectionsCriteria.PROFILE_WALKING:
@@ -266,7 +284,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                             break;
                         case DirectionsCriteria.PROFILE_CYCLING:
                             if (cyclingRoute != null)
-                            routeLineSource.setGeoJson(LineString.fromPolyline(Objects.requireNonNull(cyclingRoute.geometry()), PRECISION_6));
+                                routeLineSource.setGeoJson(LineString.fromPolyline(Objects.requireNonNull(cyclingRoute.geometry()), PRECISION_6));
                             break;
                         default:
                             break;
@@ -286,10 +304,10 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
          * Add the LineLayer to the map. This layer will display the directions route.
          */
         routeLayer.setProperties(
-                lineCap(Property.LINE_CAP_ROUND),  //shape of the route line endings
+                lineCap(Property.LINE_CAP_ROUND),  // Shape of the route line endings
                 lineJoin(Property.LINE_JOIN_ROUND),
                 lineWidth(5f),
-                lineColor(Color.parseColor("#006eff"))  //set route line color here
+                lineColor(Color.parseColor("#006eff"))  // Set route line color here
         );
         loadedMapStyle.addLayer(routeLayer);
 
@@ -367,6 +385,9 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         }
     }
 
+    /**
+     * Creates a location request
+     */
     protected void createLocationRequest() {
         locationRequest = LocationRequest.create();
         locationRequest.setInterval(10000);
@@ -374,6 +395,9 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
+    /**
+     * Creates a location request like Google do
+     */
     protected void createLocationRequestPopup() {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest);
@@ -402,6 +426,37 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     public void findLocation(View view) {
         createLocationRequestPopup();
         mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f), 2000);
+
+        /*
+         * Save last location
+         */
+        if (userLocation != null) {
+            SharedPreferences sharedPreferences = this.getSharedPreferences("location", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putFloat("lastLatitude", (float) userLocation.getLatitude());
+            editor.putFloat("lastLongitude", (float) userLocation.getLongitude());
+            editor.apply();
+        }
+    }
+
+    /**Ad
+     * Calculates distance between two points
+     *
+     * @param point1 is the first location
+     * @param point2 is the second location
+     * @return the distance, automatically selects whether meter or kilometer
+     */
+    private String getDistance(@NonNull LatLng point1, @NonNull Point point2) {
+        double distance = TurfMeasurement.distance(Point.fromLngLat(
+                point1.getLongitude(),
+                point1.getLatitude()),
+                Point.fromLngLat(point2.longitude(), point2.latitude())) * 1000;
+
+        if (distance >= 1000){
+            return String.format("%.1f", distance / 1000) + " kilometre";
+        } else {
+            return Math.round(distance) + " metre";
+        }
     }
 
     @Override
