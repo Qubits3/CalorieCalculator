@@ -12,6 +12,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +40,11 @@ import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
+import com.mapbox.mapboxsdk.location.modes.CameraMode;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
@@ -48,6 +54,8 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.turf.TurfMeasurement;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -72,6 +80,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     private static final String ICON_LAYER_ID = "icon-layer-id";
     private static final String ICON_SOURCE_ID = "icon-source-id";
     private static final String RED_PIN_ICON_ID = "red-pin-icon-id";
+
     private MapView mapView;
     private MapboxMap mapboxMap;
     private DirectionsRoute walkingRoute;
@@ -88,14 +97,21 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     LocationRequest locationRequest;
     LatLng userLocation;
     FloatingActionButton mapsFab;
+    TextView toplamKaloriTextView, ortalamaHizTextView;
+    Button startRouteButton;
+    private boolean isRouteStarted = false;
+    DecimalFormat df;
 
-    TextView toplamYolTextView;
+    BigDecimal burnedCalorie = new BigDecimal(0);
+    int MET = 0;
 
     private final int REQUEST_CHECK_SETTINGS = 9001;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        df = new DecimalFormat("####0.00");
 
         /*
          * Get an instance of the map, this has to be set before setContentView()
@@ -112,7 +128,9 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
          */
         mapsFab = findViewById(R.id.maps_fab);
         mapView = findViewById(R.id.mapView);
-        toplamYolTextView = findViewById(R.id.toplamYolTextView);
+        toplamKaloriTextView = findViewById(R.id.toplamKaloriTextView);
+        ortalamaHizTextView = findViewById(R.id.ortalamaHızTextView);
+        startRouteButton = findViewById(R.id.startRouteButton);
 
         /*
          * Ask to user to open his location as Google style
@@ -125,9 +143,16 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
          */
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
+            @SuppressLint("DefaultLocale")
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 userLocation = new LatLng(location.getLatitude(), location.getLongitude());  // Store current user location
+                ortalamaHizTextView.setText(String.valueOf(location.getSpeed()));
+
+                calculateCalorie(location);
+
+                if (isRouteStarted)
+                    mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(userLocation));  //track current location
             }
 
             @Override
@@ -155,7 +180,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
             /*
              * Set view style such as street view, satellite view or traffic view, and night mode can be set here as well
              */
-            mapboxMap.setStyle(Style.OUTDOORS, style -> {
+            mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
 
                 MapsActivity.this.mapboxMap = mapboxMap;
 
@@ -174,6 +199,8 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
                     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 
+                    enableLocationComponent(style);
+
                     Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     if (lastLocation != null) {
                         LatLng lastUserLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
@@ -182,11 +209,11 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                 }
 
                 /*
-                 * Move the camera to Istanbul at first start
+                 * Move the camera to Googleplex at first start
                  */
                 SharedPreferences preferences = this.getPreferences(Context.MODE_PRIVATE);
-                float latitude = preferences.getFloat("lastLatitude", 41.0049823f);
-                float longitude = preferences.getFloat("lastLongitude", 28.7319945f);
+                float latitude = preferences.getFloat("lastLatitude", 37.4220656f);
+                float longitude = preferences.getFloat("lastLongitude", -122.0862784f);
                 mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 10f));
             });
         });
@@ -212,12 +239,72 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     }
 
     /**
+     * Draw dot to the current location
+     *
+     * @param loadedMapStyle gets the current style
+     */
+    @SuppressWarnings({"MissingPermission"})
+    private void enableLocationComponent(@NonNull Style loadedMapStyle) {
+
+        // Get an instance of the component
+        LocationComponent locationComponent = mapboxMap.getLocationComponent();
+
+        // Activate with options
+        locationComponent.activateLocationComponent(LocationComponentActivationOptions.builder(this, loadedMapStyle).build());
+
+        // Enable to make component visible
+        locationComponent.setLocationComponentEnabled(true);
+
+        // Set the component's camera mode
+        locationComponent.setCameraMode(CameraMode.TRACKING);
+
+        // Set the component's render mode
+        locationComponent.setRenderMode(RenderMode.NORMAL);
+    }
+
+    /**
      * Load route info for each Directions API profile.
      */
     private void getAllRoutes() {
         for (String profile : profiles) {
             getSingleRoute(profile);
         }
+    }
+
+    private void calculateCalorie(Location location) {
+        // ToDo: This needs thread which calls every second
+        int currentSpeed = getSpeed(location);
+        if (lastSelectedDirectionsProfile.equals(DirectionsCriteria.PROFILE_CYCLING)) {
+            if (currentSpeed < 20)
+                MET = 4;
+            else if (currentSpeed >= 20 && currentSpeed <= 22)
+                MET = 8;
+            else if (currentSpeed > 22 && currentSpeed <= 25)
+                MET = 10;
+            else if (currentSpeed > 25 && currentSpeed <= 30)
+                MET = 12;
+            else if (currentSpeed > 30)
+                MET = 16;
+        } else {
+            if (currentSpeed < 4)
+                MET = 2;
+            else if (currentSpeed > 4 && currentSpeed <= 8)
+                MET = 6;
+            else if (currentSpeed > 8 && currentSpeed <= 12)
+                MET = 8;
+            else if(currentSpeed > 12 && currentSpeed < 16)
+                MET = 13;
+            else if (currentSpeed > 16)
+                MET = 17;
+        }
+
+        burnedCalorie = burnedCalorie.add(BigDecimal.valueOf((MET * 3.5 * 60) / 12000));  // Burned calorie per second
+        toplamKaloriTextView.setText(String.valueOf(burnedCalorie));
+    }
+
+    public void startRoute(View view) {
+        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f));  //track current location
+        isRouteStarted = true;
     }
 
     /**
@@ -228,12 +315,23 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     @SuppressLint({"DefaultLocale", "SetTextI18n"})
     @Override
     public boolean onMapLongClick(@NonNull LatLng point) {
+
         destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
         moveDestinationMarkerToNewLocation(point);
         getAllRoutes();
 
-        toplamYolTextView.setText(getDistance(userLocation, destination));
+        // Set bounds for route zoom
+        LatLngBounds latLngBounds = new LatLngBounds.Builder()
+                .include(userLocation)
+                .include(new LatLng(destination.latitude(), destination.longitude()))
+                .build();
 
+        // Zoom camera to the route
+        mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 300), 5000);
+
+        // ToDo: Konum açılmayınca veya uygulma açılır açılmaz bu metot çalışırsa 'double com.mapbox.mapboxsdk.geometry.LatLng.getLongitude()' on a null object reference hatasını veriyor
+
+        startRouteButton.setEnabled(true);
         return true;
     }
 
@@ -346,7 +444,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                     .build();
 
             /*
-             * Ask from the server for a route asynchronously
+             * Ask to the server a route asynchronously
              */
             mapboxDirections.enqueueCall(new Callback<DirectionsResponse>() {
                 @Override
@@ -424,6 +522,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
      * Floating action button function"
      */
     public void findLocation(View view) {
+        // ToDo: Harita ilk açıldığında kamera ortaya yakınlaşıyor, bir süre sonra doğru yere yakınlaşıyor, uzun basmanın çökmesinin nedeni bu olabilir
         createLocationRequestPopup();
         mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f), 2000);
 
@@ -439,7 +538,8 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         }
     }
 
-    /**Ad
+    /**
+     * Ad
      * Calculates distance between two points
      *
      * @param point1 is the first location
@@ -452,11 +552,15 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                 point1.getLatitude()),
                 Point.fromLngLat(point2.longitude(), point2.latitude())) * 1000;
 
-        if (distance >= 1000){
+        if (distance >= 1000) {
             return String.format("%.1f", distance / 1000) + " kilometre";
         } else {
             return Math.round(distance) + " metre";
         }
+    }
+
+    private int getSpeed(Location location) {
+        return Math.round(location.getSpeed() * 3.6f);  //Convert m/s to km/h
     }
 
     @Override

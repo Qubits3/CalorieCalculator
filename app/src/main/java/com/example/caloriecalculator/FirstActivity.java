@@ -13,6 +13,11 @@ public class FirstActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
         setTitle("Giriş Sayfası");
+
+        //ToDo: Delete this
+//        Intent intent = new Intent(FirstActivity.this, MapsActivity.class);
+//        intent.putExtra("profile", "walking");
+//        startActivity(intent);
     }
     public void onaylaButonu(View view){
         Intent intent = new Intent(FirstActivity.this, MainActivity.class);

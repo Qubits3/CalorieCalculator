@@ -25,9 +25,19 @@
             android:layout_marginStart="320dp"
             android:layout_marginTop="430dp"
             android:clickable="true"
-            android:onClick="findLocation"
             android:contentDescription="@string/find_your_location"
+            android:onClick="findLocation"
             android:src="@drawable/baseline_gps_off_24" />
+
+        <Button
+            android:id="@+id/startRouteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="200dp"
+            android:layout_marginTop="430dp"
+            android:enabled="false"
+            android:onClick="startRoute"
+            android:text="Başla" />
     </com.mapbox.mapboxsdk.maps.MapView>
 
     <LinearLayout
@@ -48,19 +58,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="Toplam yol:"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
-
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
                 android:text="Yaktığınız Kalori:"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
+
+
 
             <TextView
                 android:id="@+id/textView2"
@@ -68,7 +70,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="Gidilen yol:"
+                android:text="Gidilen Yol:"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
@@ -90,24 +92,15 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/toplamYolTextView"
+                android:id="@+id/toplamKaloriTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="0 metre"
+                android:text="0 kalori"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/textView5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:text="0"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/textView6"
@@ -120,7 +113,7 @@
                 android:textSize="20sp" />
 
             <TextView
-                android:id="@+id/textView7"
+                android:id="@+id/ortalamaHızTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -128,6 +121,7 @@
                 android:text="0"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
+
         </LinearLayout>
     </LinearLayout>
 
