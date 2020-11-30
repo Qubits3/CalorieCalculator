@@ -2,16 +2,31 @@ package com.example.caloriecalculator;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+
+    SharedPreferences sharedP;
+    TextView name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+         name = findViewById(R.id.ad);
+        sharedP = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
+
+       String savedName = sharedP.getString("isim","İsim bulunamadı");
+
+        name.setText("Merhaba "+savedName);
+
+
     }
 
     public void firstActivity(View view){
@@ -33,8 +48,5 @@ public class MainActivity extends AppCompatActivity {
         startActivity(graph);
     }
 
-    @Override
-    public void onBackPressed() {
-        // Disable back button
-    }
+
 }
