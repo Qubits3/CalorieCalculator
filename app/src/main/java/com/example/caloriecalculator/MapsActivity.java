@@ -11,6 +11,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -35,6 +36,7 @@ import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -83,10 +85,10 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
 
     private MapView mapView;
     private MapboxMap mapboxMap;
-    private DirectionsRoute walkingRoute;
-    private DirectionsRoute cyclingRoute;
+    private DirectionsRoute selectedRoute;
+    GeoJsonSource routeLineSource;
     private Point destination = Point.fromLngLat(-99.167663574, 19.426984786987);  // Set predestined location
-    private String lastSelectedDirectionsProfile = DirectionsCriteria.PROFILE_CYCLING;  // Store last selected profile
+    private String selectedDirectionsProfile = DirectionsCriteria.PROFILE_CYCLING;  // Store last selected profile
     private final String[] profiles = new String[]{
             DirectionsCriteria.PROFILE_CYCLING,
             DirectionsCriteria.PROFILE_WALKING
@@ -97,10 +99,14 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     LocationRequest locationRequest;
     LatLng userLocation;
     FloatingActionButton mapsFab;
-    TextView toplamKaloriTextView, ortalamaHizTextView;
+    TextView toplamKaloriTextView, ortalamaHizTextView, gidilenYolTextView;
     Button startRouteButton;
     private boolean isRouteStarted = false;
+    private boolean isConnected = false;
     DecimalFormat df;
+
+    Handler handler;
+    Runnable runnable;
 
     BigDecimal burnedCalorie = new BigDecimal(0);
     int MET = 0;
@@ -112,6 +118,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         super.onCreate(savedInstanceState);
 
         df = new DecimalFormat("####0.00");
+        handler = new Handler();
 
         /*
          * Get an instance of the map, this has to be set before setContentView()
@@ -121,7 +128,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         setContentView(R.layout.activity_maps);
 
         Bundle extras = getIntent().getExtras();
-        lastSelectedDirectionsProfile = extras.getString("profile");  // Get profile from Main Activity
+        selectedDirectionsProfile = extras.getString("profile");  // Get profile from Main Activity
 
         /*
          * Initialize components
@@ -129,8 +136,9 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         mapsFab = findViewById(R.id.maps_fab);
         mapView = findViewById(R.id.mapView);
         toplamKaloriTextView = findViewById(R.id.toplamKaloriTextView);
-        ortalamaHizTextView = findViewById(R.id.ortalamaHızTextView);
+        ortalamaHizTextView = findViewById(R.id.ortalamaHizTextView);
         startRouteButton = findViewById(R.id.startRouteButton);
+        gidilenYolTextView = findViewById(R.id.gidilenYolTextView);
 
         /*
          * Ask to user to open his location as Google style
@@ -143,14 +151,12 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
          */
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
-            @SuppressLint("DefaultLocale")
+            @SuppressLint({"DefaultLocale", "SetTextI18n"})
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 userLocation = new LatLng(location.getLatitude(), location.getLongitude());  // Store current user location
-                ortalamaHizTextView.setText(String.valueOf(location.getSpeed()));
-
-                calculateCalorie(location);
-
+                ortalamaHizTextView.setText(String.format("%.1f", location.getSpeed()) + " m/s");
+                isConnected = true;
                 if (isRouteStarted)
                     mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(userLocation));  //track current location
             }
@@ -162,12 +168,14 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
 
             @Override
             public void onProviderEnabled(@NonNull String provider) {
+                isConnected = true;
                 mapsFab.setEnabled(true);  // Enable floating action button if GPS is on
                 mapsFab.setImageResource(R.drawable.baseline_location_searching_24);
             }
 
             @Override
             public void onProviderDisabled(@NonNull String provider) {
+                isConnected = false;
                 mapsFab.setEnabled(false);  // Disable floating action button if GPS is off
                 mapsFab.setImageResource(R.drawable.baseline_gps_off_24);
             }
@@ -271,40 +279,62 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         }
     }
 
-    private void calculateCalorie(Location location) {
-        // ToDo: This needs thread which calls every second
-        int currentSpeed = getSpeed(location);
-        if (lastSelectedDirectionsProfile.equals(DirectionsCriteria.PROFILE_CYCLING)) {
-            if (currentSpeed < 20)
-                MET = 4;
-            else if (currentSpeed >= 20 && currentSpeed <= 22)
-                MET = 8;
-            else if (currentSpeed > 22 && currentSpeed <= 25)
-                MET = 10;
-            else if (currentSpeed > 25 && currentSpeed <= 30)
-                MET = 12;
-            else if (currentSpeed > 30)
-                MET = 16;
-        } else {
-            if (currentSpeed < 4)
-                MET = 2;
-            else if (currentSpeed > 4 && currentSpeed <= 8)
-                MET = 6;
-            else if (currentSpeed > 8 && currentSpeed <= 12)
-                MET = 8;
-            else if(currentSpeed > 12 && currentSpeed < 16)
-                MET = 13;
-            else if (currentSpeed > 16)
-                MET = 17;
-        }
+    @SuppressLint("SetTextI18n")
+    private void onRouteOngoing(Location location) {
+        if (isRouteStarted) {
+            runnable = () -> {
+                int currentSpeed = getSpeed(location);
+                if (selectedDirectionsProfile.equals(DirectionsCriteria.PROFILE_CYCLING)) {
+                    if (currentSpeed < 20)
+                        MET = 4;
+                    else if (currentSpeed > 20 && currentSpeed <= 22)
+                        MET = 8;
+                    else if (currentSpeed > 22 && currentSpeed <= 25)
+                        MET = 10;
+                    else if (currentSpeed > 25 && currentSpeed <= 30)
+                        MET = 12;
+                    else if (currentSpeed > 30)
+                        MET = 16;
+                } else {
+                    if (currentSpeed < 4)
+                        MET = 2;
+                    else if (currentSpeed > 4 && currentSpeed <= 8)
+                        MET = 6;
+                    else if (currentSpeed > 8 && currentSpeed <= 12)
+                        MET = 8;
+                    else if (currentSpeed > 12 && currentSpeed < 16)
+                        MET = 13;
+                    else if (currentSpeed > 16)
+                        MET = 17;
+                }
 
-        burnedCalorie = burnedCalorie.add(BigDecimal.valueOf((MET * 3.5 * 60) / 12000));  // Burned calorie per second
-        toplamKaloriTextView.setText(String.valueOf(burnedCalorie));
+                burnedCalorie = burnedCalorie.add(BigDecimal.valueOf((MET * 3.5 * 60) / 12000));  // Burned calorie per second
+                toplamKaloriTextView.setText(burnedCalorie + " kalori");
+                gidilenYolTextView.setText(getDistance(userLocation, destination));
+
+                handler.postDelayed(runnable, 1000);
+            };
+            handler.post(runnable);
+        }
     }
 
+    @SuppressLint("SetTextI18n")
     public void startRoute(View view) {
+        isRouteStarted = !isRouteStarted;  // Toggle between true and false
+
         mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f));  //track current location
-        isRouteStarted = true;
+
+        onRouteOngoing(convertLatLngToLocation(userLocation));
+
+        if (!isRouteStarted) {  //Route has finished
+            handler.removeCallbacks(runnable);
+            startRouteButton.setText("Başla");
+            startRouteButton.setEnabled(false);
+            removeRouteLine();
+        } else {  // Route is ongoing
+            startRouteButton.setText("Bitir");
+
+        }
     }
 
     /**
@@ -315,24 +345,24 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     @SuppressLint({"DefaultLocale", "SetTextI18n"})
     @Override
     public boolean onMapLongClick(@NonNull LatLng point) {
+        if (isConnected) {
+            destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+            moveDestinationMarkerToNewLocation(point);
+            getAllRoutes();
 
-        destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
-        moveDestinationMarkerToNewLocation(point);
-        getAllRoutes();
+            // Set bounds for route zoom
+            LatLngBounds latLngBounds = new LatLngBounds.Builder()
+                    .include(userLocation)
+                    .include(new LatLng(destination.latitude(), destination.longitude()))
+                    .build();
 
-        // Set bounds for route zoom
-        LatLngBounds latLngBounds = new LatLngBounds.Builder()
-                .include(userLocation)
-                .include(new LatLng(destination.latitude(), destination.longitude()))
-                .build();
+            // Zoom camera to the route
+            mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 300), 5000);
 
-        // Zoom camera to the route
-        mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 300), 5000);
-
-        // ToDo: Konum açılmayınca veya uygulma açılır açılmaz bu metot çalışırsa 'double com.mapbox.mapboxsdk.geometry.LatLng.getLongitude()' on a null object reference hatasını veriyor
-
-        startRouteButton.setEnabled(true);
-        return true;
+            startRouteButton.setEnabled(true);
+            return true;
+        } else
+            return false;
     }
 
     /**
@@ -359,37 +389,6 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                 Feature.fromGeometry(Point.fromLngLat(destination.longitude(),
                         destination.latitude())));
         loadedMapStyle.addSource(iconGeoJsonSource);
-    }
-
-    /**
-     * Display the Directions API route line depending on which profile was last
-     * selected.
-     */
-    private void showRouteLine() {
-        if (mapboxMap != null) {
-            mapboxMap.getStyle(style -> {
-
-                // Retrieve and update the source designated for showing the directions route
-                GeoJsonSource routeLineSource = style.getSourceAs(ROUTE_SOURCE_ID);
-
-                // Create a LineString with the directions route's geometry and
-                // Reset the GeoJSON source for the route LineLayer source
-                if (routeLineSource != null) {
-                    switch (lastSelectedDirectionsProfile) {
-                        case DirectionsCriteria.PROFILE_WALKING:
-                            if (walkingRoute != null)
-                                routeLineSource.setGeoJson(LineString.fromPolyline(Objects.requireNonNull(walkingRoute.geometry()), PRECISION_6));
-                            break;
-                        case DirectionsCriteria.PROFILE_CYCLING:
-                            if (cyclingRoute != null)
-                                routeLineSource.setGeoJson(LineString.fromPolyline(Objects.requireNonNull(cyclingRoute.geometry()), PRECISION_6));
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            });
-        }
     }
 
     /**
@@ -459,27 +458,46 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                         return;
                     }
 
-                    switch (profile) {
-                        case DirectionsCriteria.PROFILE_WALKING:
-                            walkingRoute = response.body().routes().get(0);
-                            break;
-                        case DirectionsCriteria.PROFILE_CYCLING:
-                            cyclingRoute = response.body().routes().get(0);
-                            break;
-                        default:
-                            break;
-                    }
+                    selectedRoute = response.body().routes().get(0);
                     showRouteLine();
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
                     Timber.e("Error: " + throwable.getMessage());
-                    Toast.makeText(MapsActivity.this,
-                            "Error: " + throwable.getMessage(),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MapsActivity.this, "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
+        }
+    }
+
+    /**
+     * Display the Directions API route line depending on which profile was last
+     * selected.
+     */
+    private void showRouteLine() {
+        if (mapboxMap != null) {
+            mapboxMap.getStyle(style -> {
+
+                // Retrieve and update the source designated for showing the directions route
+                routeLineSource = style.getSourceAs(ROUTE_SOURCE_ID);
+
+                // Create a LineString with the directions route's geometry and
+                // Reset the GeoJSON source for the route LineLayer source
+                if (routeLineSource != null) {
+                    routeLineSource.setGeoJson(LineString.fromPolyline(Objects.requireNonNull(selectedRoute.geometry()), PRECISION_6));
+                }
+            });
+        }
+    }
+
+    /**
+     * Remove the blue route line and destination marker from the map
+     */
+    private void removeRouteLine() {
+        if (mapboxMap != null) {
+            routeLineSource.setGeoJson(FeatureCollection.fromJson(""));
+            mapboxMap.getStyle(style -> style.removeImage(RED_PIN_ICON_ID));
         }
     }
 
@@ -524,7 +542,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     public void findLocation(View view) {
         // ToDo: Harita ilk açıldığında kamera ortaya yakınlaşıyor, bir süre sonra doğru yere yakınlaşıyor, uzun basmanın çökmesinin nedeni bu olabilir
         createLocationRequestPopup();
-        mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f), 2000);
+        mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18f), 2000);
 
         /*
          * Save last location
@@ -539,7 +557,19 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     }
 
     /**
-     * Ad
+     * Converts LatLng to Location
+     *
+     * @param latLng is location in LatLng
+     * @return location in Location type
+     */
+    public Location convertLatLngToLocation(@NonNull LatLng latLng) {
+        Location location = new Location(LocationManager.GPS_PROVIDER);
+        location.setLatitude(latLng.getLatitude());
+        location.setLongitude(latLng.getLongitude());
+        return location;
+    }
+
+    /**
      * Calculates distance between two points
      *
      * @param point1 is the first location

@@ -65,12 +65,12 @@
 
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/textView1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="Gidilen Yol:"
+                android:text="Kalan Yol:"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
@@ -103,22 +103,22 @@
 
 
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/gidilenYolTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="0"
+                android:text="0 metre"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
             <TextView
-                android:id="@+id/ortalamaHızTextView"
+                android:id="@+id/ortalamaHizTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="0"
+                android:text="0 m/s"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
