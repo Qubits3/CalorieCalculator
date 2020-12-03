@@ -37,7 +37,7 @@
             android:layout_marginTop="430dp"
             android:enabled="false"
             android:onClick="startRoute"
-            android:text="Başla" />
+            android:text="@string/basla" />
     </com.mapbox.mapboxsdk.maps.MapView>
 
     <LinearLayout
@@ -58,7 +58,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="Yaktığınız Kalori:"
+                android:text="@string/yaktiginiz_kalori"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
@@ -70,7 +70,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="Kalan Yol:"
+                android:text="@string/kalan_yol"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
@@ -80,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="Ortalama Hız:"
+                android:text="@string/ortalama_hiz"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
         </LinearLayout>
@@ -97,18 +97,18 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="0 kalori"
+                android:text="@string/_0_kalori"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
 
             <TextView
-                android:id="@+id/gidilenYolTextView"
+                android:id="@+id/kalanYolTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="0 metre"
+                android:text="@string/_0_metre"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
@@ -118,7 +118,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="0 m/s"
+                android:text="@string/_0_m_s"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 

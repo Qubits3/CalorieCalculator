@@ -7,4 +7,11 @@
     <string name="walking_profile">Walking</string>
     <string name="cycling_profile">Cycling</string>
     <string name="instruction">Instruction</string>
+    <string name="basla">Başla</string>
+    <string name="yaktiginiz_kalori">Yaktığınız Kalori:</string>
+    <string name="kalan_yol">Kalan Yol:</string>
+    <string name="ortalama_hiz">Ortalama Hız:</string>
+    <string name="_0_kalori">0 kalori</string>
+    <string name="_0_metre">0 metre</string>
+    <string name="_0_m_s">0 m/s</string>
 </resources>

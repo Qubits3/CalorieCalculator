@@ -58,6 +58,7 @@ import com.mapbox.turf.TurfMeasurement;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.Calendar;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -99,11 +100,12 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     LocationRequest locationRequest;
     LatLng userLocation;
     FloatingActionButton mapsFab;
-    TextView toplamKaloriTextView, ortalamaHizTextView, gidilenYolTextView;
+    TextView toplamKaloriTextView, ortalamaHizTextView, kalanYolTextView;
     Button startRouteButton;
     private boolean isRouteStarted = false;
     private boolean isConnected = false;
     DecimalFormat df;
+    SharedPreferences sharedPreferences;
 
     Handler handler;
     Runnable runnable;
@@ -130,6 +132,10 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         Bundle extras = getIntent().getExtras();
         selectedDirectionsProfile = extras.getString("profile");  // Get profile from Main Activity
 
+        sharedPreferences = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
+
+        resetDailyCalorieOfAllDay();
+
         /*
          * Initialize components
          */
@@ -138,7 +144,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         toplamKaloriTextView = findViewById(R.id.toplamKaloriTextView);
         ortalamaHizTextView = findViewById(R.id.ortalamaHizTextView);
         startRouteButton = findViewById(R.id.startRouteButton);
-        gidilenYolTextView = findViewById(R.id.gidilenYolTextView);
+        kalanYolTextView = findViewById(R.id.kalanYolTextView);
 
         /*
          * Ask to user to open his location as Google style
@@ -159,6 +165,11 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                 isConnected = true;
                 if (isRouteStarted)
                     mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(userLocation));  //track current location
+                if (!isRouteStarted){
+                    toplamKaloriTextView.setText("0 kalori");
+                    kalanYolTextView.setText("0 metre");
+                    ortalamaHizTextView.setText("0 m/s");
+                }
             }
 
             @Override
@@ -219,9 +230,9 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                 /*
                  * Move the camera to Googleplex at first start
                  */
-                SharedPreferences preferences = this.getPreferences(Context.MODE_PRIVATE);
-                float latitude = preferences.getFloat("lastLatitude", 37.4220656f);
-                float longitude = preferences.getFloat("lastLongitude", -122.0862784f);
+
+                float latitude = sharedPreferences.getFloat("lastLatitude", 37.4220656f);
+                float longitude = sharedPreferences.getFloat("lastLongitude", -122.0862784f);
                 mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 10f));
             });
         });
@@ -281,6 +292,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
 
     @SuppressLint("SetTextI18n")
     private void onRouteOngoing(Location location) {
+
         if (isRouteStarted) {
             runnable = () -> {
                 int currentSpeed = getSpeed(location);
@@ -310,16 +322,19 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
 
                 burnedCalorie = burnedCalorie.add(BigDecimal.valueOf((MET * 3.5 * 60) / 12000));  // Burned calorie per second
                 toplamKaloriTextView.setText(burnedCalorie + " kalori");
-                gidilenYolTextView.setText(getDistance(userLocation, destination));
+                kalanYolTextView.setText(getDistance(userLocation, destination));
 
-                handler.postDelayed(runnable, 1000);
+                handler.postDelayed(runnable, 1000);  //post runnable every second
             };
-            handler.post(runnable);
+            handler.post(runnable);  //post runnable for the first time
         }
     }
 
     @SuppressLint("SetTextI18n")
     public void startRoute(View view) {
+        resetDailyCalorieOfAllDay();
+
+        toplamKaloriTextView.setText("0  kalori");
         isRouteStarted = !isRouteStarted;  // Toggle between true and false
 
         mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f));  //track current location
@@ -327,13 +342,44 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         onRouteOngoing(convertLatLngToLocation(userLocation));
 
         if (!isRouteStarted) {  //Route has finished
+            storeBurnedCalorieAndDay();
+
             handler.removeCallbacks(runnable);
             startRouteButton.setText("Başla");
             startRouteButton.setEnabled(false);
+            ortalamaHizTextView.setText("0 m/s");
+
             removeRouteLine();
         } else {  // Route is ongoing
             startRouteButton.setText("Bitir");
+        }
+    }
 
+    /**
+     * Store calorie to device with shared preferences.
+     */
+    private void storeBurnedCalorieAndDay() {
+        sharedPreferences.edit()
+                .putString("dailyCalorie", burnedCalorie.toString())
+                .putInt("day", getDay())
+                .putString(String.valueOf(getDay()), burnedCalorie.toString())
+                .apply();
+    }
+
+    /**
+     * Gets current day value from {@link Calendar}
+     *
+     * @return day value in integer
+     */
+    public int getDay() {
+        return Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+    }
+
+    private void resetDailyCalorieOfAllDay(){
+        if (sharedPreferences.getInt("day", 0) != getDay()){  // Reset daily calorie if day is different
+            sharedPreferences.edit()
+                    .putString("dailyCalorieOfAllDay", "0")
+                    .apply();
         }
     }
 
@@ -540,7 +586,6 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
      * Floating action button function"
      */
     public void findLocation(View view) {
-        // ToDo: Harita ilk açıldığında kamera ortaya yakınlaşıyor, bir süre sonra doğru yere yakınlaşıyor, uzun basmanın çökmesinin nedeni bu olabilir
         createLocationRequestPopup();
         mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18f), 2000);
 
@@ -548,7 +593,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
          * Save last location
          */
         if (userLocation != null) {
-            SharedPreferences sharedPreferences = this.getSharedPreferences("location", Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putFloat("lastLatitude", (float) userLocation.getLatitude());
             editor.putFloat("lastLongitude", (float) userLocation.getLongitude());
