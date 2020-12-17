@@ -8,8 +8,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 
 public class FirstActivity extends AppCompatActivity {
 
@@ -18,6 +22,7 @@ public class FirstActivity extends AppCompatActivity {
     EditText surnameL;
     EditText heightL;
     EditText weightL;
+    //private RadioButton erkek,kadin;
 
 
 
@@ -34,9 +39,30 @@ public class FirstActivity extends AppCompatActivity {
         surnameL = findViewById(R.id.surnameLabel);
         heightL = findViewById(R.id.heightLabel);
         weightL = findViewById(R.id.weightLabel);
+       /* erkek = findViewById(R.id.erkekRB);
+        kadin = findViewById(R.id.kadinRB);
 
+
+
+        erkek.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean one_isChecked) {
+
+            }
+        });
+
+        kadin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean two_isChecked) {
+
+            }
+        });*/
 
     }
+
+
+
+
 
     public void onayla(View view) { //onayla butonuna tıklandığında
 
@@ -46,8 +72,8 @@ public class FirstActivity extends AppCompatActivity {
         String height = heightL.getText().toString();
         String weight = weightL.getText().toString();
 
-    //bu if verimli çalışmıyor düzeltilecek!!
-        if (name.equals(" ")|| name==null ) {
+
+        if (name.isEmpty() || surname.isEmpty() || height.isEmpty() || weight.isEmpty() ) {
 
             Toast.makeText(this, "Lütfen Bilgilerinizi Doldurunuz!", Toast.LENGTH_LONG).show();
         } else {    //veriler sharedpreferencesa aktarılıyor
@@ -72,12 +98,13 @@ public class FirstActivity extends AppCompatActivity {
 }
 /*
 eklenmesi düşünülenler
-1- girilen isimlerin yazılanyerde sürekli gözükmesi eğer boş olursa hata mesajı verdirmesi
-2-cinsiyet seçimi sharede aktarılacak
-3-xml in başına görsel eklenecek
-4-isimlerde karakter sınırı ve özel karakter girilmemesi
-5- bilgiler girildiğinde butona  tıklanıldığında bool ile true değeri verilecek ve bu sayfa ilk başta birdaha gösterilmeyecek
+girilen isimlerin yazılanyerde sürekli gözükmesi
+cinsiyet seçimi sharede aktarılacak
+xml in başına görsel eklenecek
+bilgiler girildiğinde butona  tıklanıldığında bool ile true değeri verilecek ve bu sayfa ilk başta birdaha gösterilmeyecek
 
-?-eğer yapılabilinirse cinsiyete göre resim değişmesi yapılacak
+?eğer yapılabilinirse cinsiyete göre resim değişmesi yapılacak
 
++karakter sınırı ve özel karakter girilmemesi
++boş olursa hata mesajı verdirmesi
  */

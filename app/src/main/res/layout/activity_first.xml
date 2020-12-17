@@ -25,8 +25,9 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="Adınızı Giriniz"
-            android:inputType="text"
-            android:textSize="20sp" />
+            android:maxLength="12"
+            android:inputType="text|textNoSuggestions"
+            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"            android:textSize="20sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -42,8 +43,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
+            android:maxLength="12"
             android:hint="Soyadınızı Giriniz"
-            android:inputType="textPersonName"
+            android:inputType="text"
+            android:digits="abcçdefgğhıijklmnoöpqrsştuüvwxyzABCÇDEFGĞHIİJKLMNOÖPQRSŞTUÜVWXYZ"
+
             android:textSize="18sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -61,6 +65,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="Boyunuzu Giriniz"
+            android:maxLength="3"
             android:inputType="number"
             android:textSize="18sp" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -78,12 +83,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:ems="10"
+            android:maxLength="3"
             android:hint="Kilonuzu Giriniz"
             android:inputType="number"
             android:textSize="18sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <RadioGroup
+        android:id="@+id/radio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
@@ -96,6 +103,7 @@
             android:textSize="20sp" />
 
         <RadioButton
+            android:id="@+id/erkekRB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
@@ -103,6 +111,7 @@
             android:textSize="20sp" />
 
         <RadioButton
+            android:id="@+id/kadinRB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
