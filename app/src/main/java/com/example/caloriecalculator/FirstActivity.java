@@ -1,19 +1,17 @@
 package com.example.caloriecalculator;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 
+import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
-import android.widget.RadioGroup.OnCheckedChangeListener;
 
 public class FirstActivity extends AppCompatActivity {
 
@@ -22,8 +20,8 @@ public class FirstActivity extends AppCompatActivity {
     EditText surnameL;
     EditText heightL;
     EditText weightL;
-    //private RadioButton erkek,kadin;
-
+    private RadioButton cinsiyetRB;
+    private RadioGroup cinsiyetRG;
 
 
     @Override
@@ -39,32 +37,15 @@ public class FirstActivity extends AppCompatActivity {
         surnameL = findViewById(R.id.surnameLabel);
         heightL = findViewById(R.id.heightLabel);
         weightL = findViewById(R.id.weightLabel);
-       /* erkek = findViewById(R.id.erkekRB);
-        kadin = findViewById(R.id.kadinRB);
+        cinsiyetRG = findViewById(R.id.radio);
 
-
-
-        erkek.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean one_isChecked) {
-
-            }
-        });
-
-        kadin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean two_isChecked) {
-
-            }
-        });*/
 
     }
 
-
-
-
-
     public void onayla(View view) { //onayla butonuna tıklandığında
+
+        int selectedId = cinsiyetRG.getCheckedRadioButtonId();
+        cinsiyetRB = findViewById(selectedId);
 
         //TextInputLayoutlara girilen verilerin değişkenlere alınması
         String name = nameL.getText().toString();
@@ -73,7 +54,13 @@ public class FirstActivity extends AppCompatActivity {
         String weight = weightL.getText().toString();
 
 
-        if (name.isEmpty() || surname.isEmpty() || height.isEmpty() || weight.isEmpty() ) {
+        String cinsiyet = ""; //shared' key'inin boş dönmemesi için nesne burada boş oluşturuldu.
+        if(cinsiyetRB != null){
+            cinsiyet = cinsiyetRB.getText().toString();
+        }
+
+
+        if (name.isEmpty() || surname.isEmpty() || height.isEmpty() || weight.isEmpty() || cinsiyet == "" ) {
 
             Toast.makeText(this, "Lütfen Bilgilerinizi Doldurunuz!", Toast.LENGTH_LONG).show();
         } else {    //veriler sharedpreferencesa aktarılıyor
@@ -83,10 +70,11 @@ public class FirstActivity extends AppCompatActivity {
             editor.putString("soyisim",surname);
             editor.putString("boy",height);
             editor.putString("kilo",weight);
-            //cinsiyet eklenecek!!
+            editor.putString("cinskey", cinsiyet);
+
+
             editor.apply(); //Veriler sharedprefe aktarılır.
             Toast.makeText(this, "Bilgileriniz Başarıyla Kaydedildi!", Toast.LENGTH_LONG).show();
-
 
             Intent intent = new Intent(FirstActivity.this, MainActivity.class);
             startActivity(intent);
@@ -98,8 +86,7 @@ public class FirstActivity extends AppCompatActivity {
 }
 /*
 eklenmesi düşünülenler
-girilen isimlerin yazılanyerde sürekli gözükmesi
-cinsiyet seçimi sharede aktarılacak
+girilen verileri gösterme
 xml in başına görsel eklenecek
 bilgiler girildiğinde butona  tıklanıldığında bool ile true değeri verilecek ve bu sayfa ilk başta birdaha gösterilmeyecek
 
@@ -107,4 +94,5 @@ bilgiler girildiğinde butona  tıklanıldığında bool ile true değeri verile
 
 +karakter sınırı ve özel karakter girilmemesi
 +boş olursa hata mesajı verdirmesi
++cinsiyet seçimi sharede aktarılacak
  */

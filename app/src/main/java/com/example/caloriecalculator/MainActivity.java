@@ -23,8 +23,9 @@ public class MainActivity extends AppCompatActivity {
         sharedP = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
 
        String savedName = sharedP.getString("isim","İsim bulunamadı");
+       String cins = sharedP.getString("cinskey","Belirsiz");
 
-        name.setText("Merhaba "+savedName);
+        name.setText("Merhaba "+savedName+ " "+cins);
 
 
     }

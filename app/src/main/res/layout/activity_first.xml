@@ -17,17 +17,21 @@
         android:focusableInTouchMode="true"
         android:layout_marginBottom="5dp"
         android:textColorHint="@color/purple_700"
+        app:counterEnabled="true"
+        app:counterMaxLength="12"
         >
 
         <EditText
             android:id="@+id/nameLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             android:ems="10"
             android:hint="Adınızı Giriniz"
-            android:maxLength="12"
             android:inputType="text|textNoSuggestions"
-            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"            android:textSize="20sp" />
+            android:maxLength="12"
+            android:text=""
+            android:textSize="20sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
