@@ -110,7 +110,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     Handler handler;
     Runnable runnable;
 
-    BigDecimal burnedCalorie = new BigDecimal(0);
+    BigDecimal burnedCalorie = new BigDecimal(0), burnedCalorieOfAllDay = new BigDecimal(0);
     int MET = 0;
 
     private final int REQUEST_CHECK_SETTINGS = 9001;
@@ -135,6 +135,11 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         sharedPreferences = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
 
         resetDailyCalorieOfAllDay();
+        burnedCalorieOfAllDay = new BigDecimal(sharedPreferences.getString("dailyCalorieOfAllDay", "0"));
+
+        storeDay();
+
+        System.out.println("all calorie " + burnedCalorieOfAllDay);
 
         /*
          * Initialize components
@@ -164,8 +169,8 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                 ortalamaHizTextView.setText(String.format("%.1f", location.getSpeed()) + " m/s");
                 isConnected = true;
                 if (isRouteStarted)
-                    mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(userLocation));  //track current location
-                if (!isRouteStarted){
+                    mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(userLocation));  // Track current location
+                if (!isRouteStarted) {
                     toplamKaloriTextView.setText("0 kalori");
                     kalanYolTextView.setText("0 metre");
                     ortalamaHizTextView.setText("0 m/s");
@@ -320,13 +325,13 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                         MET = 17;
                 }
 
-                burnedCalorie = burnedCalorie.add(BigDecimal.valueOf((MET * 3.5 * 60) / 12000));  // Burned calorie per second
+                burnedCalorie = burnedCalorie.add(BigDecimal.valueOf((MET * 3.5 * 60) / 12000));  // Calculate burned calorie every second
                 toplamKaloriTextView.setText(burnedCalorie + " kalori");
                 kalanYolTextView.setText(getDistance(userLocation, destination));
 
-                handler.postDelayed(runnable, 1000);  //post runnable every second
+                handler.postDelayed(runnable, 1000);  // Post runnable every second
             };
-            handler.post(runnable);  //post runnable for the first time
+            handler.post(runnable);  // Post runnable for the first time
         }
     }
 
@@ -337,17 +342,22 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
         toplamKaloriTextView.setText("0  kalori");
         isRouteStarted = !isRouteStarted;  // Toggle between true and false
 
-        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f));  //track current location
+        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f));  // Track current location
 
         onRouteOngoing(convertLatLngToLocation(userLocation));
 
-        if (!isRouteStarted) {  //Route has finished
-            storeBurnedCalorieAndDay();
+        if (!isRouteStarted) {  // Route has finished
+            burnedCalorieOfAllDay = burnedCalorieOfAllDay.add(burnedCalorie);  // Sum total calorie
 
             handler.removeCallbacks(runnable);
             startRouteButton.setText("Başla");
             startRouteButton.setEnabled(false);
             ortalamaHizTextView.setText("0 m/s");
+
+            burnedCalorie = new BigDecimal(0);  // Reset calorie at end of the route
+            storeDay();
+            storeTotalCalorie();
+            storeTotalCalorieToDay();
 
             removeRouteLine();
         } else {  // Route is ongoing
@@ -356,14 +366,42 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     }
 
     /**
-     * Store calorie to device with shared preferences.
+     * Store calorie to device with shared preferences
      */
-    private void storeBurnedCalorieAndDay() {
+    private void storeTotalCalorie() {
         sharedPreferences.edit()
-                .putString("dailyCalorie", burnedCalorie.toString())
-                .putInt("day", getDay())
-                .putString(String.valueOf(getDay()), burnedCalorie.toString())
+                .putString("dailyCalorieOfAllDay", burnedCalorieOfAllDay.toString())
                 .apply();
+    }
+
+    /**
+     * Stores total calorie day by day
+     */
+    private void storeTotalCalorieToDay(){
+        sharedPreferences.edit()
+                .putString(String.valueOf(getDay()), burnedCalorieOfAllDay.toString())
+                .apply();
+    }
+
+    /**
+     * Store current day to device with shared preferences
+     */
+    private void storeDay(){
+        sharedPreferences.edit()
+                .putInt("day", getDay())
+                .apply();
+    }
+
+    /**
+     * Resets total calorie
+     */
+    private void resetDailyCalorieOfAllDay() {
+        if (sharedPreferences.getInt("day", 0) != getDay()) {  // Reset daily calorie if day is different
+            sharedPreferences.edit()
+                    .putString("dailyCalorieOfAllDay", "0")
+                    .apply();
+            System.out.println("Calorie reset!");
+        }
     }
 
     /**
@@ -373,14 +411,6 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
      */
     public int getDay() {
         return Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-    }
-
-    private void resetDailyCalorieOfAllDay(){
-        if (sharedPreferences.getInt("day", 0) != getDay()){  // Reset daily calorie if day is different
-            sharedPreferences.edit()
-                    .putString("dailyCalorieOfAllDay", "0")
-                    .apply();
-        }
     }
 
     /**
@@ -588,6 +618,8 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     public void findLocation(View view) {
         createLocationRequestPopup();
         mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18f), 2000);
+
+        System.out.println(burnedCalorieOfAllDay);
 
         /*
          * Save last location
