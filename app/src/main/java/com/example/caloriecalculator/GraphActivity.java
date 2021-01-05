@@ -39,7 +39,7 @@ public class GraphActivity extends AppCompatActivity {
 
         sharedPreferences = getSharedPreferences("com.example.caloriecalculator", MODE_PRIVATE);
         day = sharedPreferences.getInt("day",1);
-        height = Integer.parseInt(sharedPreferences.getString("dailyCalorieOfAllDay",""));
+        height = sharedPreferences.getString("dailyCalorieOfAllDay","");
         height /= 5;
         daytograph();
     }
