@@ -12,6 +12,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -121,6 +122,8 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
 
         df = new DecimalFormat("####0.00");
         handler = new Handler();
+
+        System.out.println("day:" + getDay());
 
         /*
          * Get an instance of the map, this has to be set before setContentView()
@@ -326,7 +329,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                 }
 
                 burnedCalorie = burnedCalorie.add(BigDecimal.valueOf((MET * 3.5 * 60) / 12000));  // Calculate burned calorie every second
-                toplamKaloriTextView.setText(burnedCalorie + " kalori");
+                toplamKaloriTextView.setText(String.valueOf(burnedCalorie).replace(".", ",") + " kalori");
                 kalanYolTextView.setText(getDistance(userLocation, destination));
 
                 handler.postDelayed(runnable, 1000);  // Post runnable every second
@@ -377,7 +380,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     /**
      * Stores total calorie day by day
      */
-    private void storeTotalCalorieToDay(){
+    private void storeTotalCalorieToDay() {
         sharedPreferences.edit()
                 .putString(String.valueOf(getDay()), burnedCalorieOfAllDay.toString())
                 .apply();
@@ -386,7 +389,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     /**
      * Store current day to device with shared preferences
      */
-    private void storeDay(){
+    private void storeDay() {
         sharedPreferences.edit()
                 .putInt("day", getDay())
                 .apply();
