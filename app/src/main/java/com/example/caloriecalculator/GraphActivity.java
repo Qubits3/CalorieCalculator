@@ -106,9 +106,7 @@ public class GraphActivity extends AppCompatActivity {
             saturdaypic.getLayoutParams().height = height;
         }else if(day == 1){
             sundaypic.getLayoutParams().height = height;
-        }else{
 
-        }
     }
 */
 }
