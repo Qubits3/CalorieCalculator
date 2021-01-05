@@ -22,12 +22,15 @@ public class GraphActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     int day;
     int height;
+    String dailyCal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
         setTitle("Grafik");
+
+        sharedPreferences = getSharedPreferences("com.example.caloriecalculator", MODE_PRIVATE);
 
         mondaypic = findViewById(R.id.mondaypic);
         tuesdaypic = findViewById(R.id.tuesdaypic);
@@ -37,10 +40,17 @@ public class GraphActivity extends AppCompatActivity {
         saturdaypic = findViewById(R.id.saturdaypic);
         sundaypic = findViewById(R.id.sundaypic);
 
-        sharedPreferences = getSharedPreferences("com.example.caloriecalculator", MODE_PRIVATE);
+        dailyCal = sharedPreferences.getString("dailyCalorieOfAllDay","");
+
         day = sharedPreferences.getInt("day",1);
-        height = sharedPreferences.getString("dailyCalorieOfAllDay","");
-        height /= 5;
+
+        String bironcekigun = sharedPreferences.getString(String.valueOf(day - 1), "");
+
+        if (!dailyCal.equals("0")){
+            height = Integer.parseInt(dailyCal.substring(0, dailyCal.indexOf(".")));
+            height /= 5;
+        }
+
         daytograph();
     }
 

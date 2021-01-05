@@ -156,6 +156,7 @@
         app:layout_constraintEnd_toStartOf="@+id/mondaypic"
         app:layout_constraintStart_toStartOf="parent" />
 
+
     <ImageView
         android:id="@+id/mondaypic"
         android:layout_width="25dp"
@@ -166,6 +167,8 @@
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toStartOf="@+id/tuesdaypic"
         app:srcCompat="@drawable/monday" />
+
+
 
     <ImageView
         android:id="@+id/tuesdaypic"
