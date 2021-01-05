@@ -6,4 +6,231 @@
     android:layout_height="match_parent"
     tools:context=".GraphActivity">
 
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="284dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="200dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/monday"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:text="Pzt"
+            android:textAlignment="center"
+            tools:layout_editor_absoluteX="61dp"
+            tools:layout_editor_absoluteY="227dp" />
+
+        <TextView
+            android:id="@+id/tuesday"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:text="Sal"
+            android:textAlignment="center"
+            tools:layout_editor_absoluteX="115dp"
+            tools:layout_editor_absoluteY="226dp" />
+
+        <TextView
+            android:id="@+id/wednesday"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:text="Çar"
+            android:textAlignment="center"
+            tools:layout_editor_absoluteX="159dp"
+            tools:layout_editor_absoluteY="226dp" />
+
+        <TextView
+            android:id="@+id/thursday"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:text="Per"
+            android:textAlignment="center"
+            tools:layout_editor_absoluteX="199dp"
+            tools:layout_editor_absoluteY="225dp" />
+
+        <TextView
+            android:id="@+id/friday"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:text="Cum"
+            android:textAlignment="center"
+            tools:layout_editor_absoluteX="233dp"
+            tools:layout_editor_absoluteY="225dp" />
+
+        <TextView
+            android:id="@+id/saturday"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:text="Cmt"
+            android:textAlignment="center"
+            tools:layout_editor_absoluteX="277dp"
+            tools:layout_editor_absoluteY="227dp" />
+
+        <TextView
+            android:id="@+id/sunday"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:text="Paz"
+            android:textAlignment="center"
+            tools:layout_editor_absoluteX="318dp"
+            tools:layout_editor_absoluteY="223dp" />
+
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView10"
+        android:layout_width="0dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="61dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginEnd="61dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+    <TextView
+        android:id="@+id/textView11"
+        android:layout_width="0dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="17dp"
+        android:text="100kcal_________________"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/mondaypic"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView14"
+        android:layout_width="0dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="55dp"
+        android:text="500kcal___________________"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="@+id/textView15"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView15"
+        android:layout_width="0dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="93dp"
+        android:text="1000kcal______________________"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/mondaypic"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView16"
+        android:layout_width="0dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="131dp"
+        android:text="1500kcal_____________________"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="@+id/textView15"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView17"
+        android:layout_width="0dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="169dp"
+        android:text="2000kcal__________________"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/mondaypic"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/mondaypic"
+        android:layout_width="25dp"
+        android:layout_height="400px"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="20dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/tuesdaypic"
+        app:srcCompat="@drawable/monday" />
+
+    <ImageView
+        android:id="@+id/tuesdaypic"
+        android:layout_width="25dp"
+        android:layout_height="200px"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="20dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/wednesdaypic"
+        app:srcCompat="@drawable/tuesday" />
+
+    <ImageView
+        android:id="@+id/sundaypic"
+        android:layout_width="25dp"
+        android:layout_height="300px"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="20dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/sunday" />
+
+    <ImageView
+        android:id="@+id/saturdaypic"
+        android:layout_width="25dp"
+        android:layout_height="100px"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="20dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/sundaypic"
+        app:srcCompat="@drawable/saturday" />
+
+    <ImageView
+        android:id="@+id/fridaypic"
+        android:layout_width="25dp"
+        android:layout_height="150px"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="20dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/saturdaypic"
+        app:srcCompat="@drawable/friday" />
+
+    <ImageView
+        android:id="@+id/thursdaypic"
+        android:layout_width="25dp"
+        android:layout_height="250px"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="20dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/fridaypic"
+        app:srcCompat="@drawable/thursday" />
+
+    <ImageView
+        android:id="@+id/wednesdaypic"
+        android:layout_width="25dp"
+        android:layout_height="350px"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="20dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/thursdaypic"
+        app:srcCompat="@drawable/wednesday" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
