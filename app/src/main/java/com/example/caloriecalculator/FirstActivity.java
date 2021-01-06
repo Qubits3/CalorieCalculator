@@ -24,10 +24,14 @@ public class FirstActivity extends AppCompatActivity {
     private RadioButton cinsiyetRB;
     private RadioGroup cinsiyetRG;
     ImageView img;
-
+    public boolean isFull;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
         setTitle("Kişisel Bilgilerim");
@@ -110,10 +114,12 @@ public class FirstActivity extends AppCompatActivity {
             editor.putString("boy",height);
             editor.putString("kilo",weight);
             editor.putString("cinskey", cinsiyet);
-
+            this.isFull = true;
 
             editor.apply(); //Veriler sharedprefe aktarılır.
             Toast.makeText(this, "Bilgileriniz Başarıyla Kaydedildi!", Toast.LENGTH_LONG).show();
+
+
 
             img.setImageResource(R.drawable.female);
 
@@ -127,7 +133,6 @@ public class FirstActivity extends AppCompatActivity {
 }
 /*
 eklenmesi düşünülenler
-girilen verileri gösterme
 xml in başına görsel eklenecek
 bilgiler girildiğinde butona  tıklanıldığında bool ile true değeri verilecek ve bu sayfa ilk başta birdaha gösterilmeyecek
 

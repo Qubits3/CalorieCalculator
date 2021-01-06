@@ -13,21 +13,34 @@ public class MainActivity extends AppCompatActivity {
 
     SharedPreferences sharedP;
     TextView name;
+    boolean profile = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-         name = findViewById(R.id.ad);
-        sharedP = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
-
-       String savedName = sharedP.getString("isim","İsim bulunamadı");
-       String cins = sharedP.getString("cinskey","Belirsiz");
-
-        name.setText("Merhaba "+savedName+ " "+cins);
+        FirstActivity aktivite = new FirstActivity();
 
 
+
+
+
+        if(profile == aktivite.isFull){
+            Intent first = new Intent(getApplicationContext(), FirstActivity.class);
+            startActivity(first);
+        }
+        else {
+            super.onCreate(savedInstanceState);
+
+            setContentView(R.layout.activity_main);
+
+            name = findViewById(R.id.ad);
+            sharedP = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
+
+            String savedName = sharedP.getString("isim", "İsim bulunamadı");
+            String cins = sharedP.getString("cinskey", "Belirsiz");
+
+            name.setText("Merhaba " + savedName + " " + cins);
+
+        }
     }
 
     public void firstActivity(View view){
