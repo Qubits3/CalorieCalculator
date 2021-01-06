@@ -19,8 +19,12 @@ public class GraphActivity extends AppCompatActivity {
     ImageView fridaypic;
     ImageView saturdaypic;
     ImageView sundaypic;
+    TextView verim;
     SharedPreferences sharedPreferences;
     int height;
+    int day;
+    int oncekigun = 0;
+    String bironcekigun;
     String mondayCal;
     String tuesdayCal;
     String wednesdayCal;
@@ -44,6 +48,7 @@ public class GraphActivity extends AppCompatActivity {
         fridaypic = findViewById(R.id.fridaypic);
         saturdaypic = findViewById(R.id.saturdaypic);
         sundaypic = findViewById(R.id.sundaypic);
+        verim = findViewById(R.id.verim);
 
         mondayCal = sharedPreferences.getString("2","");
         tuesdayCal = sharedPreferences.getString("3","");
@@ -52,13 +57,12 @@ public class GraphActivity extends AppCompatActivity {
         fridayCal = sharedPreferences.getString("6","");
         saturdayCal = sharedPreferences.getString("7","");
         sundayCal = sharedPreferences.getString("1","");
+        bironcekigun = sharedPreferences.getString(String.valueOf(day - 1), "");
 
-
-        //day = sharedPreferences.getInt("day",1);
-
-        //String bironcekigun = sharedPreferences.getString(String.valueOf(day - 1), "");
-
-        if (!mondayCal.equals("0") && !mondayCal.equals("")){
+        if (!bironcekigun.equals("0") && !bironcekigun.equals("")) {
+            oncekigun = Integer.parseInt(bironcekigun.substring(0, bironcekigun.indexOf(".")));
+            oncekigun /= 5;
+        }if (!mondayCal.equals("0") && !mondayCal.equals("")){
             height = Integer.parseInt(mondayCal.substring(0, mondayCal.indexOf(".")));
             height /= 5;
             mondaypic.getLayoutParams().height = height;
@@ -88,25 +92,38 @@ public class GraphActivity extends AppCompatActivity {
             sundaypic.getLayoutParams().height = height;
         }
 
-
+        day = sharedPreferences.getInt("day",1);
+        verimtotext();
     }
-/*
-        public void daytograph(){
-        if(day == 2){
-            mondaypic.getLayoutParams().height = height;
-        }else if(day == 3){
-            tuesdaypic.getLayoutParams().height = height;
-        }else if(day == 4){
-            wednesdaypic.getLayoutParams().height = height;
-        }else if(day == 5){
-            thursdaypic.getLayoutParams().height = height;
-        }else if(day == 6){
-            fridaypic.getLayoutParams().height = height;
-        }else if(day == 7){
-            saturdaypic.getLayoutParams().height = height;
-        }else if(day == 1){
-            sundaypic.getLayoutParams().height = height;
 
-    }
-*/
+        private void verimtotext() {
+        if(height > 500){
+            verim.setText("Bugün oldukça iyisiniz.");
+        }else if(height > 250){
+            verim.setText("Yeterli değil biraz daha gayret etmelisiniz.");
+        }else if(height > 100){
+            verim.setText("Çok tembelsiniz biraz daha gayret.");
+        }else if(height <= 100){
+            verim.setText("Babaannem senden azimlidir.");
+        }
+        /*
+            if (day == 2) {
+
+            } else if (day == 3) {
+
+            } else if (day == 4) {
+
+            } else if (day == 5) {
+
+            } else if (day == 6) {
+
+            } else if (day == 7) {
+
+            } else if (day == 1) {
+
+            }
+
+         */
+        }
+
 }
