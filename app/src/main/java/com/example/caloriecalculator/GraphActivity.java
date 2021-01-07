@@ -10,6 +10,8 @@ import android.view.Display;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Calendar;
+
 public class GraphActivity extends AppCompatActivity {
 
     ImageView mondaypic;
@@ -23,8 +25,8 @@ public class GraphActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     int height;
     int day;
-    int oncekigun = 0;
-    String bironcekigun;
+    //int oncekigun = 0;
+    //String bironcekigun;
     String mondayCal;
     String tuesdayCal;
     String wednesdayCal;
@@ -38,6 +40,8 @@ public class GraphActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
         setTitle("Grafik");
+
+        storeDay();
 
         sharedPreferences = getSharedPreferences("com.example.caloriecalculator", MODE_PRIVATE);
 
@@ -57,12 +61,14 @@ public class GraphActivity extends AppCompatActivity {
         fridayCal = sharedPreferences.getString("6","");
         saturdayCal = sharedPreferences.getString("7","");
         sundayCal = sharedPreferences.getString("1","");
-        bironcekigun = sharedPreferences.getString(String.valueOf(day - 1), "");
-
+        //bironcekigun = sharedPreferences.getString(String.valueOf(day - 1), "");
+/*
         if (!bironcekigun.equals("0") && !bironcekigun.equals("")) {
             oncekigun = Integer.parseInt(bironcekigun.substring(0, bironcekigun.indexOf(".")));
             oncekigun /= 5;
-        }if (!mondayCal.equals("0") && !mondayCal.equals("")){
+        }
+        */
+        if (!mondayCal.equals("0") && !mondayCal.equals("")){
             height = Integer.parseInt(mondayCal.substring(0, mondayCal.indexOf(".")));
             height /= 5;
             mondaypic.getLayoutParams().height = height;
@@ -80,7 +86,7 @@ public class GraphActivity extends AppCompatActivity {
             thursdaypic.getLayoutParams().height = height;
         }if (!fridayCal.equals("0") && !fridayCal.equals("")){
             height = Integer.parseInt(fridayCal.substring(0, fridayCal.indexOf(".")));
-            height /= 5;
+            height /=5;
             fridaypic.getLayoutParams().height = height;
         }if (!saturdayCal.equals("0") && !saturdayCal.equals("")){
             height = Integer.parseInt(saturdayCal.substring(0, saturdayCal.indexOf(".")));
@@ -93,37 +99,66 @@ public class GraphActivity extends AppCompatActivity {
         }
 
         day = sharedPreferences.getInt("day",1);
-        verimtotext();
+
+            verimtotext();
+
+
     }
 
         private void verimtotext() {
-        if(height > 500){
-            verim.setText("Bugün oldukça iyisiniz.");
-        }else if(height > 250){
-            verim.setText("Yeterli değil biraz daha gayret etmelisiniz.");
-        }else if(height > 100){
-            verim.setText("Çok tembelsiniz biraz daha gayret.");
-        }else if(height <= 100){
-            verim.setText("Babaannem senden azimlidir.");
-        }
-        /*
-            if (day == 2) {
 
-            } else if (day == 3) {
+            if (day == 2 && !mondayCal.equals("0") && !mondayCal.equals("")) {
+                height = Integer.parseInt(mondayCal.substring(0, mondayCal.indexOf(".")));
 
-            } else if (day == 4) {
+                mondaypic.setPadding(5,5,5,5);
+                mondaypic.setBackgroundColor(Color.BLACK);
+            } else if (day == 3 && !tuesdayCal.equals("0") && !tuesdayCal.equals("")) {
+                height = Integer.parseInt(tuesdayCal.substring(0, tuesdayCal.indexOf(".")));
 
-            } else if (day == 5) {
+                tuesdaypic.setPadding(5,5,5,5);
+                tuesdaypic.setBackgroundColor(Color.BLACK);
+            } else if (day == 4 && !wednesdayCal.equals("0") && !wednesdayCal.equals("")) {
+                height = Integer.parseInt(wednesdayCal.substring(0, wednesdayCal.indexOf(".")));
 
-            } else if (day == 6) {
+                wednesdaypic.setPadding(5,5,5,5);
+                wednesdaypic.setBackgroundColor(Color.BLACK);
+            } else if (day == 5 && !thursdayCal.equals("0") && !thursdayCal.equals("")) {
+                height = Integer.parseInt(thursdayCal.substring(0, thursdayCal.indexOf(".")));
+                thursdaypic.setPadding(5,5,5,5);
+                thursdaypic.setBackgroundColor(Color.BLACK);
+            } else if (day == 6 && !fridayCal.equals("0") && !fridayCal.equals("")) {
+                height = Integer.parseInt(fridayCal.substring(0, fridayCal.indexOf(".")));
 
-            } else if (day == 7) {
+                fridaypic.setPadding(5,5,5,5);
+                fridaypic.setBackgroundColor(Color.BLACK);
+            } else if (day == 7 && !saturdayCal.equals("0") && !saturdayCal.equals("")) {
+                height = Integer.parseInt(saturdayCal.substring(0, saturdayCal.indexOf(".")));
 
-            } else if (day == 1) {
+                saturdaypic.setPadding(5,5,5,5);
+                saturdaypic.setBackgroundColor(Color.BLACK);
+            } else if (day == 1 && !sundayCal.equals("0") && !sundayCal.equals("")) {
+                height = Integer.parseInt(sundayCal.substring(0, sundayCal.indexOf(".")));
 
+                sundaypic.setPadding(5,5,5,5);
+                sundaypic.setBackgroundColor(Color.BLACK);
             }
-
-         */
+            if(height > 500){
+                verim.setText("Bugün oldukça iyisiniz.");
+            }else if(height > 250){
+                verim.setText("Bugünlük yeterli bir efor.");
+            }else if(height > 100){
+                verim.setText("Bugün fena değilsiniz.");
+            }else if(height <= 100){
+                verim.setText("Bugün çok kötüsünüz.");
+            }
         }
 
+    private void storeDay() {
+        sharedPreferences.edit()
+                .putInt("day", getDay())
+                .apply();
+    }
+    public int getDay() {
+        return Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+    }
 }
