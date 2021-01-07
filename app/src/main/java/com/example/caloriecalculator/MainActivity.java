@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.Console;
+
 public class MainActivity extends AppCompatActivity {
 
     SharedPreferences sharedP;
@@ -17,30 +19,27 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        FirstActivity aktivite = new FirstActivity();
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        sharedP = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
+        String cins = sharedP.getString("cinskey", "Belirsiz");
+        String savedName = sharedP.getString("isim", "İsim bulunamadı");
 
 
+        name = findViewById(R.id.ad);
+        name.setText("Merhaba " + savedName + " " + cins);
 
-
-
-        if(profile == aktivite.isFull){
+        if(cins == "Belirsiz"){
             Intent first = new Intent(getApplicationContext(), FirstActivity.class);
             startActivity(first);
         }
-        else {
-            super.onCreate(savedInstanceState);
 
-            setContentView(R.layout.activity_main);
-
-            name = findViewById(R.id.ad);
-            sharedP = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
-
-            String savedName = sharedP.getString("isim", "İsim bulunamadı");
-            String cins = sharedP.getString("cinskey", "Belirsiz");
-
-            name.setText("Merhaba " + savedName + " " + cins);
-
+        if(savedName == "İsim bulunamadı"){
+            MainActivity.this.finish();
+            System.exit(0);
         }
+
     }
 
     public void firstActivity(View view){
