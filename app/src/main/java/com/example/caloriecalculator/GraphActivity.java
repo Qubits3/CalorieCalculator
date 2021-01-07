@@ -41,9 +41,9 @@ public class GraphActivity extends AppCompatActivity {
         setContentView(R.layout.activity_graph);
         setTitle("Grafik");
 
-        storeDay();
-
         sharedPreferences = getSharedPreferences("com.example.caloriecalculator", MODE_PRIVATE);
+
+        storeDay();
 
         mondaypic = findViewById(R.id.mondaypic);
         tuesdaypic = findViewById(R.id.tuesdaypic);
