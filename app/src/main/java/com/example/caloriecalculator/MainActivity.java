@@ -15,7 +15,9 @@ public class MainActivity extends AppCompatActivity {
 
     SharedPreferences sharedP;
     TextView name;
-    boolean profile = true;
+    TextView height;
+    TextView weight;
+    TextView gender;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,14 +25,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         sharedP = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
-        String cins = sharedP.getString("cinskey", "Belirsiz");
-        String savedName = sharedP.getString("isim", "İsim bulunamadı");
 
+        String savedName = sharedP.getString("isim", "İsim bulunamadı");
+        String savedSurname = sharedP.getString("soyisim","Girilmedi");
+        String savedHeight = sharedP.getString("boy","Bulunamadı");
+        String savedWeight = sharedP.getString("kilo","Bulunamadı");
+        String savedGender = sharedP.getString("cinskey", "Belirsiz");
 
         name = findViewById(R.id.ad);
-        name.setText("Merhaba " + savedName + " " + cins);
+        height = findViewById(R.id.boy);
+        weight = findViewById(R.id.kilo);
+        gender = findViewById(R.id.cinsiyet);
 
-        if(cins == "Belirsiz"){
+        name.setText("Merhaba " + savedName + " "+savedSurname);
+        gender.setText("Cinsiyetiniz: "+savedGender);
+        height.setText("Boyunuz: "+savedHeight);
+        weight.setText("Kilonuz: "+savedWeight);
+
+        if(savedGender == "Belirsiz"){
             Intent first = new Intent(getApplicationContext(), FirstActivity.class);
             startActivity(first);
         }
