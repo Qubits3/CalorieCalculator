@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    tools:ignore="ContentDescription">
 
 
     <ImageButton
@@ -50,7 +51,7 @@
         app:layout_constraintStart_toEndOf="@+id/walkButton"
         app:layout_constraintTop_toBottomOf="@+id/profileButton"
         app:srcCompat="@drawable/bisiklet"
-        android:contentDescription="TODO" />
+        android:contentDescription="@string/todo" />
 
     <ImageButton
         android:id="@+id/graphButton"
@@ -93,29 +94,6 @@
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ad" />
-
-    <TextView
-        android:id="@+id/kilo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:text="@string/kilonuz"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/boy" />
-
-    <TextView
-        android:id="@+id/cinsiyet"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:text="@string/cinsiyetiniz"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/kilo" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

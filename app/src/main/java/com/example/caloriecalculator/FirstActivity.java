@@ -17,21 +17,13 @@ import android.widget.Toast;
 public class FirstActivity extends AppCompatActivity {
 
     SharedPreferences sharedP;
-    EditText nameL;
-    EditText surnameL;
-    EditText heightL;
-    EditText weightL;
-    private RadioButton cinsiyetRB;
+    EditText nameL,surnameL,heightL,weightL;
+    private RadioButton cinsiyetRB,erkekB,kadinB;
     private RadioGroup cinsiyetRG;
     ImageView img;
-    public boolean isFull;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
         setTitle("Kişisel Bilgilerim");
@@ -46,8 +38,38 @@ public class FirstActivity extends AppCompatActivity {
         cinsiyetRG = findViewById(R.id.radio);
         img = findViewById(R.id.mainimg);
 
+        erkekB = findViewById(R.id.erkekRB);
+
         //prefte kayıtlı resim varsa burada çekilip gösterilecek(yapıalcak)
-        img.setImageResource(R.drawable.notselected);
+        //img.setImageResource(R.drawable.notselected);
+
+
+        String savedName = sharedP.getString("isim", "");
+        String savedSurname = sharedP.getString("soyisim","");
+        String savedHeight = sharedP.getString("boy","");
+        String savedWeight = sharedP.getString("kilo","");
+        String savedGender = sharedP.getString("cinskey", "");
+        int checkedId = sharedP.getInt("Gender", 0);
+        nameL.setText(savedName);
+        surnameL.setText(savedSurname);
+        heightL.setText(savedHeight);
+        weightL.setText(savedWeight);
+        cinsiyetRG.check(checkedId);
+
+        //if ve else ifleri false görüp direkt else e geçiş yapıyor. Burası çalışmıyorda olabilir. onstart mı lazım?
+        if(erkekB.isActivated()){
+            img.setImageResource(R.drawable.male);
+        }
+        else if(savedGender == "Kadın"){
+            img.setImageResource(R.drawable.female);
+        }
+        else{
+            img.setImageResource(R.drawable.notselected);
+           // Toast.makeText(getApplicationContext(), "ağla", Toast.LENGTH_SHORT).show();
+        }
+
+
+
 
     }
 
@@ -114,14 +136,18 @@ public class FirstActivity extends AppCompatActivity {
             editor.putString("boy",height);
             editor.putString("kilo",weight);
             editor.putString("cinskey", cinsiyet);
-            this.isFull = true;
+
+            editor.putInt("Gender", cinsiyetRB.getId());
+
 
             editor.apply(); //Veriler sharedprefe aktarılır.
+
+            System.out.println(" dwa"+cinsiyetRB.getId());
+
             Toast.makeText(this, "Bilgileriniz Başarıyla Kaydedildi!", Toast.LENGTH_LONG).show();
 
 
-
-            img.setImageResource(R.drawable.female);
+            //img.setImageResource(R.drawable.notselected);
 
             Intent intent = new Intent(FirstActivity.this, MainActivity.class);
             startActivity(intent);
@@ -131,13 +157,3 @@ public class FirstActivity extends AppCompatActivity {
 
 
 }
-/*
-eklenmesi düşünülenler
-xml in başına görsel eklenecek
-bilgiler girildiğinde butona  tıklanıldığında bool ile true değeri verilecek ve bu sayfa ilk başta birdaha gösterilmeyecek
-
-+eğer yapılabilinirse cinsiyete göre resim değişmesi yapılacak
-+karakter sınırı ve özel karakter girilmemesi
-+boş olursa hata mesajı verdirmesi
-+cinsiyet seçimi sharede aktarılacak
- */
