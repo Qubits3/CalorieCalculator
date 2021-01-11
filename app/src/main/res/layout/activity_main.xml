@@ -71,29 +71,17 @@
         android:contentDescription="@string/todo" />
 
     <TextView
-        android:id="@+id/ad"
+        android:id="@+id/kaloriVew"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="216dp"
-        android:text="@string/merhaba"
+        android:layout_marginBottom="168dp"
+        android:text="Günlük yaktığınız kalori: "
 
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/boy"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:text="@string/boyunuz"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ad" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

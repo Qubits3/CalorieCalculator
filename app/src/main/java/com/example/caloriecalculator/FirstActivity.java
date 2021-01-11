@@ -57,20 +57,15 @@ public class FirstActivity extends AppCompatActivity {
         cinsiyetRG.check(checkedId);
 
         //if ve else ifleri false görüp direkt else e geçiş yapıyor. Burası çalışmıyorda olabilir. onstart mı lazım?
-        if(erkekB.isActivated()){
+        if(savedGender.equals("Erkek")){
             img.setImageResource(R.drawable.male);
         }
-        else if(savedGender == "Kadın"){
+        else if(savedGender.equals("Kadın")){
             img.setImageResource(R.drawable.female);
         }
         else{
             img.setImageResource(R.drawable.notselected);
-           // Toast.makeText(getApplicationContext(), "ağla", Toast.LENGTH_SHORT).show();
         }
-
-
-
-
     }
 
     @Override
@@ -136,13 +131,9 @@ public class FirstActivity extends AppCompatActivity {
             editor.putString("boy",height);
             editor.putString("kilo",weight);
             editor.putString("cinskey", cinsiyet);
-
             editor.putInt("Gender", cinsiyetRB.getId());
 
-
             editor.apply(); //Veriler sharedprefe aktarılır.
-
-            System.out.println(" dwa"+cinsiyetRB.getId());
 
             Toast.makeText(this, "Bilgileriniz Başarıyla Kaydedildi!", Toast.LENGTH_LONG).show();
 
@@ -154,6 +145,5 @@ public class FirstActivity extends AppCompatActivity {
         }
 
     }
-
 
 }

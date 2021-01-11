@@ -9,8 +9,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import java.io.Console;
-
 public class MainActivity extends AppCompatActivity {
 
     SharedPreferences sharedP;
@@ -25,10 +23,11 @@ public class MainActivity extends AppCompatActivity {
 
         String savedName = sharedP.getString("isim", "İsim bulunamadı");
         String savedGender = sharedP.getString("cinskey", "Belirsiz");
+        String kalori = sharedP.getString("dailyCalorieOfAllDay", "0");
 
-       TextView yazi = findViewById(R.id.ad);
+       TextView yazi = findViewById(R.id.kaloriVew);
 
-       yazi.setText(savedGender);
+       yazi.setText("Günlük yaktığınız kalori: "+kalori);
 
 
 
