@@ -13,7 +13,6 @@ public class MainActivity extends AppCompatActivity {
 
     SharedPreferences sharedP;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,26 +20,13 @@ public class MainActivity extends AppCompatActivity {
 
         sharedP = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
 
-        String savedName = sharedP.getString("isim", "İsim bulunamadı");
-        String savedGender = sharedP.getString("cinskey", "Belirsiz");
+//        String savedName = sharedP.getString("isim", "İsim bulunamadı");
+//        String savedGender = sharedP.getString("cinskey", "Belirsiz");
         String kalori = sharedP.getString("dailyCalorieOfAllDay", "0");
 
        TextView yazi = findViewById(R.id.kaloriVew);
 
-       yazi.setText("Günlük yaktığınız kalori: "+kalori);
-
-
-
-        if(savedGender == "Belirsiz"){
-            Intent first = new Intent(getApplicationContext(), FirstActivity.class);
-            startActivity(first);
-        }
-
-        if(savedName == "İsim bulunamadı"){
-            MainActivity.this.finish();
-            System.exit(0);
-        }
-
+       yazi.setText("Günlük " + kalori + " kalori yaktınız.");
     }
 
     public void firstActivity(View view){
@@ -62,5 +48,8 @@ public class MainActivity extends AppCompatActivity {
         startActivity(graph);
     }
 
-
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
 }

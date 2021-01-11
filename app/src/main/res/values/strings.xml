@@ -20,4 +20,13 @@
     <string name="cinsiyetiniz">Cinsiyetiniz:</string>
     <string name="boyunuz">Boyunuz:</string>
     <string name="todo">TODO</string>
+    <string name="adinizi_giriniz">Adınızı Giriniz</string>
+    <string name="kadin">Kadın</string>
+    <string name="erkek">Erkek</string>
+    <string name="cinsiyet">Cinsiyet:</string>
+    <string name="kilonuzu_giriniz">Kilonuzu Giriniz</string>
+    <string name="boyunuzu_giriniz">Boyunuzu Giriniz</string>
+    <string name="soyadinizi_giriniz">Soyadınızı Giriniz</string>
+    <string name="onayla">Onayla</string>
+    <string name="gunluk_yaktiginiz_kalori">Günlük yaktığınız kalori:</string>
 </resources>

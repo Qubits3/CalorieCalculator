@@ -388,7 +388,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     /**
      * Store current day to device with shared preferences
      */
-    private void storeDay() {
+    public void storeDay() {
         sharedPreferences.edit()
                 .putInt("day", getDay())
                 .apply();

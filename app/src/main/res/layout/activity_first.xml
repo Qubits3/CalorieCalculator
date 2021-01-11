@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             android:ems="10"
-            android:hint="Adınızı Giriniz"
+            android:hint="@string/adinizi_giriniz"
             android:inputType="text|textNoSuggestions"
             android:maxLength="12"
             android:text=""
@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:maxLength="12"
-            android:hint="Soyadınızı Giriniz"
+            android:hint="@string/soyadinizi_giriniz"
             android:inputType="text"
             android:digits="abcçdefgğhıijklmnoöpqrsştuüvwxyzABCÇDEFGĞHIİJKLMNOÖPQRSŞTUÜVWXYZ"
 
@@ -72,7 +72,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:hint="Boyunuzu Giriniz"
+            android:hint="@string/boyunuzu_giriniz"
             android:maxLength="3"
             android:inputType="number"
             android:textSize="18sp" />
@@ -93,7 +93,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:maxLength="3"
-            android:hint="Kilonuzu Giriniz"
+            android:hint="@string/kilonuzu_giriniz"
             android:inputType="number"
             android:textSize="18sp" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -108,23 +108,23 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cinsiyet: "
+            android:text="@string/cinsiyet"
             android:textSize="20sp" />
 
         <RadioButton
             android:id="@+id/erkekRB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="Erkek"
+            android:layout_marginStart="10dp"
+            android:text="@string/erkek"
             android:textSize="20sp" />
 
         <RadioButton
             android:id="@+id/kadinRB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="Kadın"
+            android:layout_marginStart="10dp"
+            android:text="@string/kadin"
             android:textSize="20sp" />
 
 
@@ -137,7 +137,7 @@
         android:layout_marginVertical="30dp"
         android:background="@drawable/button_rounded"
         android:onClick="onayla"
-        android:text="Onayla"
+        android:text="@string/onayla"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

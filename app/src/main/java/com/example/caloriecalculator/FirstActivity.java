@@ -1,12 +1,10 @@
 package com.example.caloriecalculator;
 
 
-import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -14,13 +12,17 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 public class FirstActivity extends AppCompatActivity {
 
     SharedPreferences sharedP;
     EditText nameL,surnameL,heightL,weightL;
-    private RadioButton cinsiyetRB,erkekB,kadinB;
+    private RadioButton cinsiyetRB, erkekB, kadinB;
     private RadioGroup cinsiyetRG;
     ImageView img;
+
+    EditText nameLabel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,32 +74,33 @@ public class FirstActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        cinsiyetRG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
+        cinsiyetRG.setOnCheckedChangeListener((group, checkedId) -> {
 
-                RadioButton rb = findViewById(checkedId);
-                int index = cinsiyetRG.indexOfChild(rb);
+            RadioButton rb = findViewById(checkedId);
+            int index = cinsiyetRG.indexOfChild(rb);
 
-                switch (index){
+            SharedPreferences.Editor editor = sharedP.edit();
+            editor.putInt("Gender", index);
+            editor.apply();
 
-                    case 1:
-                        img.setImageResource(R.drawable.male);
-                       // Toast.makeText(getApplicationContext(), rb.getText(), Toast.LENGTH_SHORT).show();
-                        break;
+            switch (index){
 
-                    case 2:
-                        img.setImageResource(R.drawable.female);
-                        //Toast.makeText(getApplicationContext(), rb.getText(), Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        img.setImageResource(R.drawable.notselected);
-                      //  Toast.makeText(getApplicationContext(), "bum", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-                //Toast.makeText(getApplicationContext(), rb.getText(), Toast.LENGTH_SHORT).show();
+                case 1:
+                    img.setImageResource(R.drawable.male);
+                   // Toast.makeText(getApplicationContext(), rb.getText(), Toast.LENGTH_SHORT).show();
+                    break;
 
+                case 2:
+                    img.setImageResource(R.drawable.female);
+                    //Toast.makeText(getApplicationContext(), rb.getText(), Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    img.setImageResource(R.drawable.notselected);
+                  //  Toast.makeText(getApplicationContext(), "bum", Toast.LENGTH_SHORT).show();
+                    break;
             }
+            //Toast.makeText(getApplicationContext(), rb.getText(), Toast.LENGTH_SHORT).show();
+
         });
 
     }
@@ -120,7 +123,7 @@ public class FirstActivity extends AppCompatActivity {
         }
 
 
-        if (name.isEmpty() || surname.isEmpty() || height.isEmpty() || weight.isEmpty() || cinsiyet == "" ) {
+        if (name.isEmpty() || surname.isEmpty() || height.isEmpty() || weight.isEmpty() || cinsiyet.equals("")) {
 
             Toast.makeText(this, "Lütfen Bilgilerinizi Doldurunuz!", Toast.LENGTH_LONG).show();
         } else {    //veriler sharedpreferencesa aktarılıyor
