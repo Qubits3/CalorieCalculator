@@ -21,10 +21,15 @@ public class MainActivity extends AppCompatActivity {
         sharedP = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
 
 //        String savedName = sharedP.getString("isim", "İsim bulunamadı");
-//        String savedGender = sharedP.getString("cinskey", "Belirsiz");
+        String savedGender = sharedP.getString("cinskey", "Belirsiz");
         String kalori = sharedP.getString("dailyCalorieOfAllDay", "0");
 
        TextView yazi = findViewById(R.id.kaloriVew);
+
+        if(savedGender == "Belirsiz"){
+            Intent first = new Intent(getApplicationContext(), FirstActivity.class);
+            startActivity(first);
+        }
 
        yazi.setText("Günlük " + kalori + " kalori yaktınız.");
     }
