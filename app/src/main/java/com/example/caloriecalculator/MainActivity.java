@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         TextView yazi = findViewById(R.id.kaloriVew);
 
         kalori = kalori.substring(0,kalori.indexOf("."));
-        yazi.setText("Günlük " + kalori + " kalori yaktınız.");
+        yazi.setText("Bugün " + kalori + " kalori yaktınız.");
 
     }
 
