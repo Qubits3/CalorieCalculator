@@ -70,31 +70,31 @@ public class GraphActivity extends AppCompatActivity {
         */
         if (!mondayCal.equals("0") && !mondayCal.equals("")){
             height = Integer.parseInt(mondayCal.substring(0, mondayCal.indexOf(".")));
-            height /= 5;
+            //height /= 5;
             mondaypic.getLayoutParams().height = height;
         }if (!tuesdayCal.equals("0") && !tuesdayCal.equals("")){
             height = Integer.parseInt(tuesdayCal.substring(0, tuesdayCal.indexOf(".")));
-            height /= 5;
+            //height /= 5;
             tuesdaypic.getLayoutParams().height = height;
         }if (!wednesdayCal.equals("0") && !wednesdayCal.equals("")){
             height = Integer.parseInt(wednesdayCal.substring(0, wednesdayCal.indexOf(".")));
-            height /= 5;
+            //height /= 5;
             wednesdaypic.getLayoutParams().height = height;
         }if (!thursdayCal.equals("0") && !thursdayCal.equals("")){
             height = Integer.parseInt(thursdayCal.substring(0, thursdayCal.indexOf(".")));
-            height /= 5;
+            //height /= 5;
             thursdaypic.getLayoutParams().height = height;
         }if (!fridayCal.equals("0") && !fridayCal.equals("")){
             height = Integer.parseInt(fridayCal.substring(0, fridayCal.indexOf(".")));
-            height /=5;
+            //height /=5;
             fridaypic.getLayoutParams().height = height;
         }if (!saturdayCal.equals("0") && !saturdayCal.equals("")){
             height = Integer.parseInt(saturdayCal.substring(0, saturdayCal.indexOf(".")));
-            height /= 5;
+            //height /= 5;
             saturdaypic.getLayoutParams().height = height;
         }if (!sundayCal.equals("0") && !sundayCal.equals("")){
             height = Integer.parseInt(sundayCal.substring(0, sundayCal.indexOf(".")));
-            height /= 5;
+            //height /= 5;
             sundaypic.getLayoutParams().height = height;
         }
 

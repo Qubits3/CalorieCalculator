@@ -12,6 +12,7 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
 
     SharedPreferences sharedP;
+    String savedGender;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,17 +22,22 @@ public class MainActivity extends AppCompatActivity {
         sharedP = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
 
 //        String savedName = sharedP.getString("isim", "İsim bulunamadı");
-        String savedGender = sharedP.getString("cinskey", "Belirsiz");
-        String kalori = sharedP.getString("dailyCalorieOfAllDay", "0");
-
-       TextView yazi = findViewById(R.id.kaloriVew);
+        savedGender = sharedP.getString("cinskey", "Belirsiz");
 
         if(savedGender == "Belirsiz"){
             Intent first = new Intent(getApplicationContext(), FirstActivity.class);
             startActivity(first);
         }
+    }
+    protected void onResume(){
+        super.onResume();
+        String kalori = sharedP.getString("dailyCalorieOfAllDay", "0");
 
-       yazi.setText("Günlük " + kalori + " kalori yaktınız.");
+        TextView yazi = findViewById(R.id.kaloriVew);
+
+        kalori = kalori.substring(0,kalori.indexOf("."));
+        yazi.setText("Günlük " + kalori + " kalori yaktınız.");
+
     }
 
     public void firstActivity(View view){

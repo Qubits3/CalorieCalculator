@@ -104,7 +104,7 @@
         android:layout_height="15dp"
         android:layout_marginStart="5dp"
         android:layout_marginBottom="17dp"
-        android:text="100kcal_________________"
+        android:text="0kcal____________________"
         android:textSize="10sp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toStartOf="@+id/mondaypic"
@@ -116,7 +116,7 @@
         android:layout_height="15dp"
         android:layout_marginStart="5dp"
         android:layout_marginBottom="55dp"
-        android:text="500kcal___________________"
+        android:text="100kcal___________________"
         android:textSize="10sp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="@+id/textView15"
@@ -128,7 +128,7 @@
         android:layout_height="15dp"
         android:layout_marginStart="5dp"
         android:layout_marginBottom="93dp"
-        android:text="1000kcal______________________"
+        android:text="200kcal_________________"
         android:textSize="10sp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toStartOf="@+id/mondaypic"
@@ -140,7 +140,7 @@
         android:layout_height="15dp"
         android:layout_marginStart="5dp"
         android:layout_marginBottom="131dp"
-        android:text="1500kcal_____________________"
+        android:text="300kcal________________"
         android:textSize="10sp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="@+id/textView15"
@@ -152,12 +152,25 @@
         android:layout_height="15dp"
         android:layout_marginStart="5dp"
         android:layout_marginBottom="169dp"
-        android:text="2000kcal__________________"
+        android:text="400kcal__________________"
         android:textSize="10sp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toStartOf="@+id/mondaypic"
         app:layout_constraintStart_toStartOf="parent" />
 
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="0dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="207dp"
+        android:text="500kcal__________________"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/mondaypic"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/mondaypic"
