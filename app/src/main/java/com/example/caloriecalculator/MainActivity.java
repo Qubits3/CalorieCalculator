@@ -39,11 +39,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateCalorieText(){
-        String kalori = sharedP.getString("dailyCalorieOfAllDay", "0.0");
-
+        String kalori = sharedP.getString("dailyCalorieOfAllDay", "0");
         TextView yazi = findViewById(R.id.kaloriVew);
 
-        kalori = kalori.substring(0,kalori.indexOf("."));
         yazi.setText("Bugün " + kalori + " kalori yaktınız.");
     }
 
