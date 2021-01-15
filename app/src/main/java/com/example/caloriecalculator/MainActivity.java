@@ -28,17 +28,24 @@ public class MainActivity extends AppCompatActivity {
             Intent first = new Intent(getApplicationContext(), FirstActivity.class);
             startActivity(first);
         }
+
+        updateCalorieText();
     }
-//    protected void onResume(){
-//        super.onResume();
-//        String kalori = sharedP.getString("dailyCalorieOfAllDay", "0.0");
-//
-//        TextView yazi = findViewById(R.id.kaloriVew);
-//
-//        kalori = kalori.substring(0,kalori.indexOf("."));
-//        yazi.setText("Bugün " + kalori + " kalori yaktınız.");
-//
-//    }
+
+    protected void onResume(){
+        super.onResume();
+
+        updateCalorieText();
+    }
+
+    private void updateCalorieText(){
+        String kalori = sharedP.getString("dailyCalorieOfAllDay", "0.0");
+
+        TextView yazi = findViewById(R.id.kaloriVew);
+
+        kalori = kalori.substring(0,kalori.indexOf("."));
+        yazi.setText("Bugün " + kalori + " kalori yaktınız.");
+    }
 
     public void firstActivity(View view){
         Intent first = new Intent(getApplicationContext(), FirstActivity.class);
