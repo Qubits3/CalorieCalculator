@@ -24,21 +24,21 @@ public class MainActivity extends AppCompatActivity {
 //        String savedName = sharedP.getString("isim", "İsim bulunamadı");
         savedGender = sharedP.getString("cinskey", "Belirsiz");
 
-        if(savedGender == "Belirsiz"){
+        if(savedGender.equals("Belirsiz")){
             Intent first = new Intent(getApplicationContext(), FirstActivity.class);
             startActivity(first);
         }
     }
-    protected void onResume(){
-        super.onResume();
-        String kalori = sharedP.getString("dailyCalorieOfAllDay", "0");
-
-        TextView yazi = findViewById(R.id.kaloriVew);
-
-        kalori = kalori.substring(0,kalori.indexOf("."));
-        yazi.setText("Bugün " + kalori + " kalori yaktınız.");
-
-    }
+//    protected void onResume(){
+//        super.onResume();
+//        String kalori = sharedP.getString("dailyCalorieOfAllDay", "0.0");
+//
+//        TextView yazi = findViewById(R.id.kaloriVew);
+//
+//        kalori = kalori.substring(0,kalori.indexOf("."));
+//        yazi.setText("Bugün " + kalori + " kalori yaktınız.");
+//
+//    }
 
     public void firstActivity(View view){
         Intent first = new Intent(getApplicationContext(), FirstActivity.class);
