@@ -113,6 +113,8 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     BigDecimal burnedCalorie = new BigDecimal(0), burnedCalorieOfAllDay = new BigDecimal(0);
     int MET = 0;
 
+    String weight;
+
     private final int REQUEST_CHECK_SETTINGS = 9001;
 
     @Override
@@ -121,8 +123,6 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
 
         df = new DecimalFormat("####0.00");
         handler = new Handler();
-
-        System.out.println("day:" + getDay());
 
         /*
          * Get an instance of the map, this has to be set before setContentView()
@@ -136,8 +136,10 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
 
         sharedPreferences = this.getSharedPreferences("com.example.caloriecalculator", Context.MODE_PRIVATE);
 
+        weight = sharedPreferences.getString("kilo", "60");
+
         resetDailyCalorieOfAllDay();
-        burnedCalorieOfAllDay = new BigDecimal(sharedPreferences.getString("dailyCalorieOfAllDay", "0"));
+        burnedCalorieOfAllDay = new BigDecimal(sharedPreferences.getString("dailyCalorieOfAllDay", "0.0"));
 
         storeDay();
 
@@ -327,8 +329,9 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
                         MET = 17;
                 }
 
-                burnedCalorie = burnedCalorie.add(BigDecimal.valueOf((MET * 3.5 * 60) / 12000));  // Calculate burned calorie every second
-                toplamKaloriTextView.setText(String.valueOf(burnedCalorie).replace(".", ",") + " kalori");
+                burnedCalorie = burnedCalorie.add(BigDecimal.valueOf((MET * 3.5 * Integer.parseInt(weight)) / 12000));  // Calculate burned calorie every second
+                toplamKaloriTextView.setText(String.valueOf(burnedCalorie)
+                        .substring(0, String.valueOf(burnedCalorie).indexOf(".") + 3).replace(".", ",") + " kalori");
                 kalanYolTextView.setText(getDistance(userLocation, destination));
 
                 handler.postDelayed(runnable, 1000);  // Post runnable every second
@@ -400,7 +403,7 @@ public class MapsActivity extends FragmentActivity implements MapboxMap.OnMapLon
     private void resetDailyCalorieOfAllDay() {
         if (sharedPreferences.getInt("day", 0) != getDay()) {  // Reset daily calorie if day is different
             sharedPreferences.edit()
-                    .putString("dailyCalorieOfAllDay", "0")
+                    .putString("dailyCalorieOfAllDay", "0.0")
                     .apply();
             System.out.println("Calorie reset!");
         }

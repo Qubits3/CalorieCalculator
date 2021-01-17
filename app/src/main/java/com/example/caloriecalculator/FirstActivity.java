@@ -1,6 +1,5 @@
 package com.example.caloriecalculator;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,12 +16,9 @@ import androidx.appcompat.app.AppCompatActivity;
 public class FirstActivity extends AppCompatActivity {
 
     SharedPreferences sharedP;
-    EditText nameL,surnameL,heightL,weightL;
-    private RadioButton cinsiyetRB, erkekB, kadinB;
+    EditText nameL, surnameL, heightL, weightL;
     private RadioGroup cinsiyetRG;
     ImageView img;
-
-    EditText nameLabel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,16 +36,11 @@ public class FirstActivity extends AppCompatActivity {
         cinsiyetRG = findViewById(R.id.radio);
         img = findViewById(R.id.mainimg);
 
-        erkekB = findViewById(R.id.erkekRB);
-
-        //prefte kayıtlı resim varsa burada çekilip gösterilecek(yapıalcak)
-        //img.setImageResource(R.drawable.notselected);
-
 
         String savedName = sharedP.getString("isim", "");
-        String savedSurname = sharedP.getString("soyisim","");
-        String savedHeight = sharedP.getString("boy","");
-        String savedWeight = sharedP.getString("kilo","");
+        String savedSurname = sharedP.getString("soyisim", "");
+        String savedHeight = sharedP.getString("boy", "");
+        String savedWeight = sharedP.getString("kilo", "60");
         String savedGender = sharedP.getString("cinskey", "");
         int checkedId = sharedP.getInt("Gender", 0);
         nameL.setText(savedName);
@@ -58,14 +49,11 @@ public class FirstActivity extends AppCompatActivity {
         weightL.setText(savedWeight);
         cinsiyetRG.check(checkedId);
 
-        //if ve else ifleri false görüp direkt else e geçiş yapıyor. Burası çalışmıyorda olabilir. onstart mı lazım?
-        if(savedGender.equals("Erkek")){
+        if (savedGender.equals("Erkek")) {
             img.setImageResource(R.drawable.male);
-        }
-        else if(savedGender.equals("Kadın")){
+        } else if (savedGender.equals("Kadın")) {
             img.setImageResource(R.drawable.female);
-        }
-        else{
+        } else {
             img.setImageResource(R.drawable.notselected);
         }
     }
@@ -83,32 +71,25 @@ public class FirstActivity extends AppCompatActivity {
             editor.putInt("Gender", index);
             editor.apply();
 
-            switch (index){
+            switch (index) {
 
                 case 1:
                     img.setImageResource(R.drawable.male);
-                   // Toast.makeText(getApplicationContext(), rb.getText(), Toast.LENGTH_SHORT).show();
                     break;
-
                 case 2:
                     img.setImageResource(R.drawable.female);
-                    //Toast.makeText(getApplicationContext(), rb.getText(), Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     img.setImageResource(R.drawable.notselected);
-                  //  Toast.makeText(getApplicationContext(), "bum", Toast.LENGTH_SHORT).show();
                     break;
             }
-            //Toast.makeText(getApplicationContext(), rb.getText(), Toast.LENGTH_SHORT).show();
-
         });
-
     }
 
     public void onayla(View view) { //onayla butonuna tıklandığında
 
         int selectedId = cinsiyetRG.getCheckedRadioButtonId();
-        cinsiyetRB = findViewById(selectedId);
+        RadioButton cinsiyetRB = findViewById(selectedId);
 
         //TextInputLayoutlara girilen verilerin değişkenlere alınması
         String name = nameL.getText().toString();
@@ -118,7 +99,7 @@ public class FirstActivity extends AppCompatActivity {
 
 
         String cinsiyet = ""; //shared' key'inin boş dönmemesi için nesne burada boş oluşturuldu.
-        if(cinsiyetRB != null){
+        if (cinsiyetRB != null) {
             cinsiyet = cinsiyetRB.getText().toString();
         }
 
@@ -130,9 +111,9 @@ public class FirstActivity extends AppCompatActivity {
 
             SharedPreferences.Editor editor = sharedP.edit();
             editor.putString("isim", name);  //isim sharedda keyi ile saklanır
-            editor.putString("soyisim",surname);
-            editor.putString("boy",height);
-            editor.putString("kilo",weight);
+            editor.putString("soyisim", surname);
+            editor.putString("boy", height);
+            editor.putString("kilo", weight);
             editor.putString("cinskey", cinsiyet);
             editor.putInt("Gender", cinsiyetRB.getId());
 
@@ -140,13 +121,8 @@ public class FirstActivity extends AppCompatActivity {
 
             Toast.makeText(this, "Bilgileriniz Başarıyla Kaydedildi!", Toast.LENGTH_LONG).show();
 
-
-            //img.setImageResource(R.drawable.notselected);
-
             Intent intent = new Intent(FirstActivity.this, MainActivity.class);
             startActivity(intent);
         }
-
     }
-
 }
