@@ -184,7 +184,6 @@
         app:srcCompat="@drawable/monday" />
 
 
-
     <ImageView
         android:id="@+id/tuesdaypic"
         android:layout_width="25dp"
