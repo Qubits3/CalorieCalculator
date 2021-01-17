@@ -40,7 +40,7 @@ public class FirstActivity extends AppCompatActivity {
         String savedName = sharedP.getString("isim", "");
         String savedSurname = sharedP.getString("soyisim", "");
         String savedHeight = sharedP.getString("boy", "");
-        String savedWeight = sharedP.getString("kilo", "60");
+        String savedWeight = sharedP.getString("kilo", "");
         String savedGender = sharedP.getString("cinskey", "");
         int checkedId = sharedP.getInt("Gender", 0);
         nameL.setText(savedName);
